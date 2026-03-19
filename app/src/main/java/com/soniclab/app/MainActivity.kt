@@ -27,14 +27,14 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             SonicLabTheme {
-                SonicLabApp()
+                SonicLabMainContent()  // ← Changed from SonicLabApp()
             }
         }
     }
 }
 
 @Composable
-fun SonicLabApp() {
+fun SonicLabMainContent() {  // ← Renamed from SonicLabApp
     val navController = rememberNavController()
     
     Scaffold(
