@@ -162,4 +162,138 @@ fun HomeScreen() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifi
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { /* Previous */ },
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipPrevious,
+                            contentDescription = "Previous",
+                            tint = LabelWhite,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    
+                    // Play/Pause button with tape reels
+                    Box(contentAlignment = Alignment.Center) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(80.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            TapeReel(isPlaying = isPlaying, size = 64.dp)
+                            Spacer(modifier = Modifier.weight(1f))
+                            TapeReel(isPlaying = isPlaying, size = 64.dp)
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                        
+                        IconButton(
+                            onClick = { isPlaying = !isPlaying },
+                            modifier = Modifier.size(72.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                tint = NixieTubeOrange,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+                    }
+                    
+                    IconButton(
+                        onClick = { /* Next */ },
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipNext,
+                            contentDescription = "Next",
+                            tint = LabelWhite,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
+            
+            // Control knobs section
+            Text(
+                text = "AUDIO CONTROLS",
+                style = MaterialTheme.typography.labelLarge,
+                color = MapleAccent,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 3.sp,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            
+            BrushedMetalPanel(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    RotaryKnob(
+                        value = volume,
+                        onValueChange = { volume = it },
+                        label = "VOLUME",
+                        size = 80.dp
+                    )
+                    RotaryKnob(
+                        value = balance,
+                        onValueChange = { balance = it },
+                        label = "BALANCE",
+                        size = 80.dp
+                    )
+                    RotaryKnob(
+                        value = tone,
+                        onValueChange = { tone = it },
+                        label = "TONE",
+                        size = 80.dp
+                    )
+                }
+            }
+            
+            // Toggle switches
+            BrushedMetalPanel(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    var loudness by remember { mutableStateOf(false) }
+                    var mono by remember { mutableStateOf(false) }
+                    var filter by remember { mutableStateOf(true) }
+                    
+                    ToggleSwitch(
+                        checked = loudness,
+                        onCheckedChange = { loudness = it },
+                        label = "LOUDNESS"
+                    )
+                    ToggleSwitch(
+                        checked = mono,
+                        onCheckedChange = { mono = it },
+                        label = "MONO"
+                    )
+                    ToggleSwitch(
+                        checked = filter,
+                        onCheckedChange = { filter = it },
+                        label = "FILTER"
+                    )
+                }
+            }
+            
+            // Bottom spacer
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
