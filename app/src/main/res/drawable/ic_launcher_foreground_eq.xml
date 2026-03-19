@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        
+        <!-- EQ Bars from left to right with varying heights -->
+        
+        <!-- Bar 1 - Short -->
+        <path
+            android:pathData="M -30,-8 L -30,8"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 2 - Medium -->
+        <path
+            android:pathData="M -20,-15 L -20,15"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 3 - Tall -->
+        <path
+            android:pathData="M -10,-25 L -10,25"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 4 - Very Tall (Center) -->
+        <path
+            android:pathData="M 0,-30 L 0,30"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 5 - Tall -->
+        <path
+            android:pathData="M 10,-25 L 10,25"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 6 - Medium -->
+        <path
+            android:pathData="M 20,-15 L 20,15"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bar 7 - Short -->
+        <path
+            android:pathData="M 30,-8 L 30,8"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"/>
+        
+        <!-- Glow effects -->
+        <path
+            android:pathData="M -30,-8 L -30,8"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.2"/>
+        
+        <path
+            android:pathData="M 0,-30 L 0,30"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.2"/>
+    </group>
+</vector>
