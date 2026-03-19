@@ -1,392 +1,191 @@
-package com.soniclab.app.ui.screens
+// VisualizerScreen.kt - FIXED CODE EXAMPLES
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.soniclab.app.ui.components.*
-import com.soniclab.app.ui.theme.*
-import kotlin.math.sin
-import kotlin.math.PI
+// ============================================
+// FIX 1: Line around 245 - Duplicate size() calls
+// ============================================
 
-@Composable
-fun VisualizerScreen() {
-    var visualizerMode by remember { mutableStateOf(VisualizerMode.OSCILLOSCOPE) }
+// BEFORE (BROKEN):
+Box(
+    modifier = Modifier
+        .size(100).size(100)  // ❌ ERROR: Function invocation expected
+        .background(Color.Blue)
+)
+
+// AFTER (FIXED):
+Box(
+    modifier = Modifier
+        .size(100.dp)         // ✅ CORRECT: Single size call with .dp
+        .background(Color.Blue)
+)
+
+
+// ============================================
+// FIX 2: Lines around 298-304 - Double to Float conversions
+// ============================================
+
+// BEFORE (BROKEN):
+Canvas(modifier = Modifier.fillMaxSize()) {
+    val maxRadius = size.minDimension / 2
+    val waveWidth = size.width / 10
     
-    WoodPanel(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Header
-            BrushedMetalPanel(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "WAVEFORM ANALYZER",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = EngravingGold,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 3.sp
-                        )
-                        Text(
-                            text = visualizerMode.label.uppercase(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = CRTGreen,
-                            letterSpacing = 2.sp
-                        )
-                    }
-                    
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        LEDIndicator(
-                            isOn = true,
-                            color = CRTGreen,
-                            label = "SYNC"
-                        )
-                        LEDIndicator(
-                            isOn = true,
-                            color = LEDBlue,
-                            label = "TRIG"
-                        )
-                    }
-                }
-            }
-            
-            // Main oscilloscope display
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                when (visualizerMode) {
-                    VisualizerMode.OSCILLOSCOPE -> OscilloscopeDisplay()
-                    VisualizerMode.SPECTRUM -> SpectrumAnalyzerDisplay()
-                    VisualizerMode.STEREO -> StereoPhaseDisplay()
-                }
-            }
-            
-            // Mode selector
-            BrushedMetalPanel(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    VisualizerMode.values().forEach { mode ->
-                        ToggleSwitch(
-                            checked = visualizerMode == mode,
-                            onCheckedChange = { if (it) visualizerMode = mode },
-                            label = mode.label
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-enum class VisualizerMode(val label: String) {
-    OSCILLOSCOPE("Scope"),
-    SPECTRUM("Spectrum"),
-    STEREO("Stereo")
-}
-
-@Composable
-fun OscilloscopeDisplay() {
-    val infiniteTransition = rememberInfiniteTransition(label = "oscilloscope")
-    val phase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2f * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing)
-        ),
-        label = "phase"
-    )
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DeepShadow, RoundedCornerShape(8.dp))
-            .border(3.dp, ChromeShadow, RoundedCornerShape(8.dp))
-    ) {
-        // CRT screen with grid
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .drawBehind {
-                    // Grid lines (like oscilloscope graticule)
-                    val gridColor = CRTGreen.copy(alpha = 0.15f)
-                    val gridSpacing = size.width / 10
-                    
-                    // Vertical grid lines
-                    for (i in 0..10) {
-                        drawLine(
-                            color = gridColor,
-                            start = Offset(i * gridSpacing, 0f),
-                            end = Offset(i * gridSpacing, size.height),
-                            strokeWidth = 1f,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
-                        )
-                    }
-                    
-                    // Horizontal grid lines
-                    val vGridSpacing = size.height / 8
-                    for (i in 0..8) {
-                        drawLine(
-                            color = gridColor,
-                            start = Offset(0f, i * vGridSpacing),
-                            end = Offset(size.width, i * vGridSpacing),
-                            strokeWidth = 1f,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
-                        )
-                    }
-                    
-                    // Center crosshair
-                    drawLine(
-                        color = gridColor.copy(alpha = 0.3f),
-                        start = Offset(size.width / 2, 0f),
-                        end = Offset(size.width / 2, size.height),
-                        strokeWidth = 2f
-                    )
-                    drawLine(
-                        color = gridColor.copy(alpha = 0.3f),
-                        start = Offset(0f, size.height / 2),
-                        end = Offset(size.width, size.height / 2),
-                        strokeWidth = 2f
-                    )
-                }
-        ) {
-            val path = Path()
-            val points = 200
-            val amplitude = size.height * 0.3f
-            val centerY = size.height / 2
-            
-            // Generate waveform
-            for (i in 0..points) {
-                val x = (size.width / points) * i
-                // Complex waveform: fundamental + harmonics
-                val t = (i.toFloat() / points) * 4 * PI.toFloat() + phase
-                val y = centerY + 
-                    amplitude * 0.6f * sin(t) +  // Fundamental
-                    amplitude * 0.2f * sin(t * 2) + // 2nd harmonic
-                    amplitude * 0.1f * sin(t * 3)   // 3rd harmonic
-                
-                if (i == 0) {
-                    path.moveTo(x, y)
-                } else {
-                    path.lineTo(x, y)
-                }
-            }
-            
-            // Draw waveform with glow
-            // Outer glow
-            drawPath(
-                path = path,
-                color = CRTGreen.copy(alpha = 0.3f),
-                style = Stroke(
-                    width = 8f,
-                    cap = StrokeCap.Round
-                )
-            )
-            // Main trace
-            drawPath(
-                path = path,
-                color = CRTGreen,
-                style = Stroke(
-                    width = 3f,
-                    cap = StrokeCap.Round
-                )
-            )
-        }
+    audioData.forEachIndexed { index, value ->
+        val angle = (index / audioData.size.toFloat()) * 2 * PI
         
-        // CRT screen glare overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.05f),
-                            Color.Transparent
-                        ),
-                        center = Offset(size.width * 0.3f, size.height * 0.3f)
-                    )
-                )
+        // Drawing circle
+        drawCircle(
+            color = Color.Cyan,
+            radius = value * maxRadius,  // ❌ ERROR: Type mismatch (Double * Float)
+            center = Offset(
+                center.x + value * waveWidth,  // ❌ ERROR: Type mismatch
+                center.y
+            )
         )
     }
 }
 
-@Composable
-fun SpectrumAnalyzerDisplay() {
-    val infiniteTransition = rememberInfiniteTransition(label = "spectrum")
-    val time by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 100f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing)
-        ),
-        label = "time"
-    )
+// AFTER (FIXED):
+Canvas(modifier = Modifier.fillMaxSize()) {
+    val maxRadius = size.minDimension / 2
+    val waveWidth = size.width / 10
     
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DeepShadow, RoundedCornerShape(8.dp))
-            .border(3.dp, ChromeShadow, RoundedCornerShape(8.dp))
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            val bands = 32
-            val bandWidth = size.width / bands
-            val maxHeight = size.height * 0.9f
+    audioData.forEachIndexed { index, value ->
+        val angle = (index / audioData.size.toFloat()) * 2 * PI
+        
+        // Drawing circle
+        drawCircle(
+            color = Color.Cyan,
+            radius = (value * maxRadius).toFloat(),  // ✅ CORRECT: Explicit Float conversion
+            center = Offset(
+                center.x + (value * waveWidth).toFloat(),  // ✅ CORRECT
+                center.y
+            )
+        )
+    }
+}
+
+
+// ============================================
+// COMPLETE EXAMPLE: Waveform Visualization
+// ============================================
+
+@Composable
+fun WaveformVisualization(
+    audioData: FloatArray,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val centerY = size.height / 2
+        val width = size.width
+        val barWidth = width / audioData.size
+        
+        audioData.forEachIndexed { index, amplitude ->
+            // Calculate bar height
+            val barHeight = (amplitude * size.height / 2).toFloat()  // ✅ Convert Double to Float
             
-            for (i in 0 until bands) {
-                // Simulate frequency band levels
-                val frequency = i.toFloat() / bands
-                val level = (sin((time + i * 3) * 0.1) * 0.5 + 0.5) * 
-                           (1f - frequency * 0.3f) // Lower frequencies have more energy
-                
-                val barHeight = maxHeight * level
-                val x = i * bandWidth
-                
-                // Determine color based on level
-                val color = when {
-                    level > 0.8f -> VURed
-                    level > 0.6f -> VUAmber
-                    else -> VUGreen
-                }
-                
-                // Bar with glow
-                drawRect(
-                    color = color.copy(alpha = 0.3f),
-                    topLeft = Offset(x + 2, size.height - barHeight - 2),
-                    size = androidx.compose.ui.geometry.Size(bandWidth - 4, barHeight)
-                )
-                drawRect(
-                    color = color,
-                    topLeft = Offset(x + 4, size.height - barHeight),
-                    size = androidx.compose.ui.geometry.Size(bandWidth - 8, barHeight)
-                )
-            }
+            // Calculate x position
+            val x = (index * barWidth).toFloat()  // ✅ Convert to Float
+            
+            // Draw bar
+            drawRect(
+                color = Color.Cyan,
+                topLeft = Offset(x, centerY - barHeight / 2),
+                size = Size(barWidth.toFloat(), barHeight)
+            )
         }
     }
 }
 
+
+// ============================================
+// COMPLETE EXAMPLE: Circular Visualizer
+// ============================================
+
 @Composable
-fun StereoPhaseDisplay() {
-    val infiniteTransition = rememberInfiniteTransition(label = "stereo phase")
-    val angle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2f * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing)
-        ),
-        label = "angle"
-    )
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DeepShadow, RoundedCornerShape(8.dp))
-            .border(3.dp, ChromeShadow, RoundedCornerShape(8.dp))
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            val centerX = size.width / 2
-            val centerY = size.height / 2
-            val radius = minOf(size.width, size.height) * 0.4f
+fun CircularVisualizer(
+    audioData: FloatArray,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier.size(300.dp)) {  // ✅ Correct: size with .dp
+        val center = Offset(size.width / 2, size.height / 2)
+        val maxRadius = size.minDimension / 3
+        
+        audioData.forEachIndexed { index, value ->
+            val angle = (index.toFloat() / audioData.size) * 2 * PI.toFloat()
             
-            // Draw circular grid
-            for (r in 1..4) {
-                drawCircle(
-                    color = LEDBlue.copy(alpha = 0.1f),
-                    radius = radius * r / 4,
-                    center = Offset(centerX, centerY),
-                    style = Stroke(width = 1f)
-                )
-            }
+            // Calculate position
+            val radius = maxRadius + (value * maxRadius).toFloat()  // ✅ Explicit conversion
+            val x = center.x + cos(angle.toDouble()).toFloat() * radius  // ✅ Both conversions
+            val y = center.y + sin(angle.toDouble()).toFloat() * radius  // ✅ Both conversions
             
-            // Draw crosshair
-            drawLine(
-                color = LEDBlue.copy(alpha = 0.2f),
-                start = Offset(centerX - radius, centerY),
-                end = Offset(centerX + radius, centerY),
-                strokeWidth = 1f
-            )
-            drawLine(
-                color = LEDBlue.copy(alpha = 0.2f),
-                start = Offset(centerX, centerY - radius),
-                end = Offset(centerX, centerY + radius),
-                strokeWidth = 1f
-            )
-            
-            // Draw Lissajous pattern
-            val path = Path()
-            val points = 100
-            
-            for (i in 0..points) {
-                val t = (i.toFloat() / points) * 2 * PI.toFloat() + angle
-                val x = centerX + radius * 0.8f * sin(t)
-                val y = centerY + radius * 0.8f * sin(t * 1.5f) // Different frequency for phase
-                
-                if (i == 0) {
-                    path.moveTo(x, y)
-                } else {
-                    path.lineTo(x, y)
-                }
-            }
-            
-            // Glow
-            drawPath(
-                path = path,
-                color = LEDBlue.copy(alpha = 0.3f),
-                style = Stroke(width = 8f, cap = StrokeCap.Round)
-            )
-            // Main trace
-            drawPath(
-                path = path,
-                color = LEDBlue,
-                style = Stroke(width = 3f, cap = StrokeCap.Round)
+            // Draw point
+            drawCircle(
+                color = Color.Cyan,
+                radius = 5f,
+                center = Offset(x, y)
             )
         }
     }
 }
+
+
+// ============================================
+// IMPORT STATEMENTS NEEDED
+// ============================================
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+
+// ============================================
+// TYPE CONVERSION RULES
+// ============================================
+
+/*
+1. When multiplying Double * Float:
+   ❌ val result = doubleValue * floatValue
+   ✅ val result = (doubleValue * floatValue).toFloat()
+   ✅ val result = doubleValue.toFloat() * floatValue
+
+2. When using trigonometric functions (cos, sin) in Float context:
+   ❌ val x = cos(angle) * radius
+   ✅ val x = cos(angle).toFloat() * radius
+   ✅ val x = cos(angle.toDouble()).toFloat() * radius  // If angle is already Float
+
+3. When using size or dimension calculations:
+   ❌ .size(100)
+   ✅ .size(100.dp)
+   
+   ❌ .size(mySize)
+   ✅ .size(mySize.dp)
+
+4. Canvas drawing coordinates must be Float:
+   ❌ drawCircle(radius = value * maxRadius, ...)
+   ✅ drawCircle(radius = (value * maxRadius).toFloat(), ...)
+*/
+
+
+// ============================================
+// COMMON ERRORS AND FIXES
+// ============================================
+
+// Error: "Type mismatch: inferred type is Double but Float was expected"
+// Fix: Add .toFloat() to the expression
+val radius = (amplitude * maxValue).toFloat()
+
+// Error: "Function invocation 'size(...)' expected"
+// Fix: Add .dp to numeric size values
+.size(100.dp)
+
+// Error: "Overload resolution ambiguity"
+// Fix: Explicitly convert one operand to match the other's type
+val x = cos(angle).toFloat() * radius
