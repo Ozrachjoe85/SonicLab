@@ -28,7 +28,6 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        // Album art placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()
