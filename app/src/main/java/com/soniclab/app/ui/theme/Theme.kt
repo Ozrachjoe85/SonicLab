@@ -10,29 +10,34 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Cyan500,
-    onPrimary = Indigo900,
-    primaryContainer = Indigo800,
-    onPrimaryContainer = Cyan400,
+private val RetroColorScheme = darkColorScheme(
+    // Primary - Glowing orange accents (like warm tubes)
+    primary = NixieTubeOrange,
+    onPrimary = WalnutDark,
+    primaryContainer = WalnutMid,
+    onPrimaryContainer = TubeGlowWarm,
     
-    secondary = Amber500,
-    onSecondary = Indigo900,
-    secondaryContainer = Indigo700,
-    onSecondaryContainer = Amber400,
+    // Secondary - Blue LEDs and switches
+    secondary = LEDBlue,
+    onSecondary = WalnutDark,
+    secondaryContainer = BrushedAluminum,
+    onSecondaryContainer = LEDBlue,
     
-    background = Indigo900,
-    onBackground = Gray100,
-    surface = Indigo800,
-    onSurface = Gray100,
-    surfaceVariant = Indigo700,
-    onSurfaceVariant = Gray200,
+    // Backgrounds - Rich wood tones
+    background = WalnutDark,
+    onBackground = LabelWhite,
+    surface = WalnutMid,
+    onSurface = LabelWhite,
+    surfaceVariant = BrushedAluminum,
+    onSurfaceVariant = WalnutDark,
     
-    outline = Gray700,
-    outlineVariant = Indigo600,
+    // Outline - Metal bezels
+    outline = BrushedAluminumLight,
+    outlineVariant = ChromeShadow,
     
-    error = Error,
-    onError = Gray100,
+    // Semantic colors
+    error = LEDRed,
+    onError = LabelWhite,
 )
 
 @Composable
@@ -40,7 +45,7 @@ fun SonicLabTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = RetroColorScheme
     
     val view = LocalView.current
     if (!view.isInEditMode) {
