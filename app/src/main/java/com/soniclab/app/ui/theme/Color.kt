@@ -2,7 +2,7 @@ package com.soniclab.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary retro colors
+// Primary colors
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
@@ -18,12 +18,12 @@ val NeonGreen = Color(0xFF39FF14)
 val NeonOrange = Color(0xFFFF6600)
 val NeonPurple = Color(0xFFBC13FE)
 
-// Retro palette - Pastel colors
+// Retro palette - Additional colors
 val RetroYellow = Color(0xFFFFD700)
 val RetroCyan = Color(0xFF00CED1)
 val RetroMagenta = Color(0xFFFF00FF)
 
-// Missing colors that caused build errors
+// Required colors from error messages
 val Gray300 = Color(0xFFD1D5DB)
 val Cyan500 = Color(0xFF06B6D4)
 val Amber500 = Color(0xFFF59E0B)
