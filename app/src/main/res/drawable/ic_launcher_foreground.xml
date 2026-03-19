@@ -5,7 +5,6 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Waveform Icon -->
     <group
         android:translateX="54"
         android:translateY="54">
@@ -72,33 +71,3 @@
             android:strokeAlpha="0.4"/>
     </group>
 </vector>
-```
-
----
-
-## 📸 **To Use Custom Images Later:**
-
-When you have actual image files (PNG), here's what you do:
-
-### **Step 1: Generate All Sizes**
-Use a tool like [Android Asset Studio](https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html) or I can give you ImageMagick commands.
-
-### **Step 2: Replace the Files**
-Upload these files to your repo:
-```
-app/src/main/res/
-├── mipmap-mdpi/
-│   ├── ic_launcher.png (48x48)
-│   └── ic_launcher_round.png (48x48)
-├── mipmap-hdpi/
-│   ├── ic_launcher.png (72x72)
-│   └── ic_launcher_round.png (72x72)
-├── mipmap-xhdpi/
-│   ├── ic_launcher.png (96x96)
-│   └── ic_launcher_round.png (96x96)
-├── mipmap-xxhdpi/
-│   ├── ic_launcher.png (144x144)
-│   └── ic_launcher_round.png (144x144)
-└── mipmap-xxxhdpi/
-    ├── ic_launcher.png (192x192)
-    └── ic_launcher_round.png (192x192)
