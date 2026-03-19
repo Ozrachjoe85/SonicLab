@@ -1,131 +1,88 @@
 package com.soniclab.app.ui.visualizer
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import com.soniclab.app.ui.theme.Cyan500
 import com.soniclab.app.ui.theme.Amber500
-import kotlin.math.sin
-import kotlin.math.PI
 
 @Composable
 fun WaveformVisualizer(
+    audioData: FloatArray,
     modifier: Modifier = Modifier,
-    isPlaying: Boolean = true
+    primaryColor: Color = Cyan500,
+    secondaryColor: Color = Amber500
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "waveform")
-    
-    val phase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (2 * PI).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (isPlaying) 3000 else 6000,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "phase"
-    )
-    
-    val amplitudePulse by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1500,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "amplitude"
-    )
-    
-    Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val centerY = size.height / 2
         val width = size.width
-        val height = size.height
-        val centerY = height / 2f
+        val barWidth = width / audioData.size
         
-        drawWaveLayer(
-            width = width,
-            centerY = centerY,
-            phase = phase,
-            amplitude = 60f * amplitudePulse,
-            frequency = 0.015f,
-            color = Cyan500,
-            alpha = 0.3f
-        )
-        
-        drawWaveLayer(
-            width = width,
-            centerY = centerY,
-            phase = phase * 1.5f,
-            amplitude = 40f * amplitudePulse,
-            frequency = 0.02f,
-            color = Amber500,
-            alpha = 0.5f
-        )
-        
-        drawWaveLayer(
-            width = width,
-            centerY = centerY,
-            phase = phase * 0.7f,
-            amplitude = 80f * amplitudePulse,
-            frequency = 0.01f,
-            color = Cyan500,
-            alpha = 0.6f
-        )
+        audioData.forEachIndexed { index, amplitude ->
+            val barHeight = (amplitude * size.height / 2).toFloat()
+            val x = (index * barWidth).toFloat()
+            
+            val color = if (index % 2 == 0) primaryColor else secondaryColor
+            
+            drawRect(
+                color = color,
+                topLeft = Offset(x, centerY - barHeight / 2),
+                size = Size(barWidth.toFloat(), barHeight)
+            )
+        }
     }
 }
 
-private fun DrawScope.drawWaveLayer(
-    width: Float,
-    centerY: Float,
-    phase: Float,
-    amplitude: Float,
-    frequency: Float,
-    color: Color,
-    alpha: Float
+@Composable
+fun LineWaveformVisualizer(
+    audioData: FloatArray,
+    modifier: Modifier = Modifier,
+    color: Color = Cyan500
 ) {
-    val path = Path()
-    val points = 200
-    
-    path.moveTo(0f, centerY)
-    
-    for (i in 0..points) {
-        val x = (i.toFloat() / points) * width
-        val y = centerY + amplitude * sin(frequency * x + phase)
-        path.lineTo(x, y)
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val centerY = size.height / 2
+        val width = size.width
+        val stepWidth = width / audioData.size
+        
+        for (i in 0 until audioData.size - 1) {
+            val x1 = (i * stepWidth).toFloat()
+            val y1 = centerY + (audioData[i] * size.height / 2).toFloat()
+            val x2 = ((i + 1) * stepWidth).toFloat()
+            val y2 = centerY + (audioData[i + 1] * size.height / 2).toFloat()
+            
+            drawLine(
+                color = color,
+                start = Offset(x1, y1),
+                end = Offset(x2, y2),
+                strokeWidth = 3f
+            )
+        }
     }
-    
-    drawPath(
-        path = path,
-        color = color.copy(alpha = alpha),
-        style = Stroke(
-            width = 3.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-    )
-    
-    drawPath(
-        path = path,
-        color = color.copy(alpha = alpha * 0.3f),
-        style = Stroke(
-            width = 8.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-    )
+}
+
+@Composable
+fun FrequencyBarsVisualizer(
+    frequencies: FloatArray,
+    modifier: Modifier = Modifier,
+    color: Color = Amber500
+) {
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val width = size.width
+        val barWidth = width / frequencies.size
+        
+        frequencies.forEachIndexed { index, magnitude ->
+            val barHeight = (magnitude * size.height).toFloat()
+            val x = (index * barWidth).toFloat()
+            
+            drawRect(
+                color = color,
+                topLeft = Offset(x, size.height - barHeight),
+                size = Size(barWidth.toFloat(), barHeight)
+            )
+        }
+    }
 }
