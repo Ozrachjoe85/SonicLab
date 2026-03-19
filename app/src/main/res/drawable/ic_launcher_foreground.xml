@@ -3,7 +3,6 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Adaptive icon safe zone: 72x72 centered (18px margins) -->
     
     <!-- Main panel -->
     <path
@@ -45,19 +44,46 @@
         android:strokeWidth="0.8"
         android:strokeColor="#e0e0e0"
         android:strokeLineCap="round"/>
-    <circle android:cx="54" android:cy="50" android:radius="2" android:fillColor="#333"/>
-    <circle android:cx="54" android:cy="50" android:radius="1.2" android:fillColor="#666"/>
     
-    <!-- LED indicators -->
-    <circle android:cx="86" android:cy="36" android:radius="2.5" android:fillColor="#003300"/>
-    <circle android:cx="86" android:cy="36" android:radius="2.5" android:fillColor="#00ff00" android:fillAlpha="0.9"/>
-    <circle android:cx="86" android:cy="36" android:radius="1.5" android:fillColor="#88ff88" android:fillAlpha="0.7"/>
+    <!-- Circles drawn as paths using pathData -->
+    <!-- Needle pivot circles -->
+    <path
+        android:pathData="M 54,50 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0"
+        android:fillColor="#333"/>
+    <path
+        android:pathData="M 54,50 m -1.2,0 a 1.2,1.2 0 1,0 2.4,0 a 1.2,1.2 0 1,0 -2.4,0"
+        android:fillColor="#666"/>
     
-    <circle android:cx="86" android:cy="44" android:radius="2.5" android:fillColor="#330000"/>
-    <circle android:cx="86" android:cy="44" android:radius="2.5" android:fillColor="#ff0000" android:fillAlpha="0.7"/>
+    <!-- LED indicators - Green -->
+    <path
+        android:pathData="M 86,36 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#003300"/>
+    <path
+        android:pathData="M 86,36 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#00ff00"
+        android:fillAlpha="0.9"/>
+    <path
+        android:pathData="M 86,36 m -1.5,0 a 1.5,1.5 0 1,0 3,0 a 1.5,1.5 0 1,0 -3,0"
+        android:fillColor="#88ff88"
+        android:fillAlpha="0.7"/>
     
-    <circle android:cx="86" android:cy="52" android:radius="2.5" android:fillColor="#333300"/>
-    <circle android:cx="86" android:cy="52" android:radius="2.5" android:fillColor="#ffff00" android:fillAlpha="0.8"/>
+    <!-- LED - Red -->
+    <path
+        android:pathData="M 86,44 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#330000"/>
+    <path
+        android:pathData="M 86,44 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#ff0000"
+        android:fillAlpha="0.7"/>
+    
+    <!-- LED - Yellow -->
+    <path
+        android:pathData="M 86,52 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#333300"/>
+    <path
+        android:pathData="M 86,52 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0"
+        android:fillColor="#ffff00"
+        android:fillAlpha="0.8"/>
     
     <!-- Level indicator background -->
     <path
@@ -76,16 +102,41 @@
     <path android:pathData="M58.5,64h7.5a0.5,0.5 0,0 1,0.5 0.5v3a0.5,0.5 0,0 1,-0.5 0.5h-7.5a0.5,0.5 0,0 1,-0.5 -0.5v-3a0.5,0.5 0,0 1,0.5 -0.5z" android:fillColor="#ff8800" android:fillAlpha="0.7"/>
     <path android:pathData="M68.5,64h7.5a0.5,0.5 0,0 1,0.5 0.5v3a0.5,0.5 0,0 1,-0.5 0.5h-7.5a0.5,0.5 0,0 1,-0.5 -0.5v-3a0.5,0.5 0,0 1,0.5 -0.5z" android:fillColor="#ff4400" android:fillAlpha="0.5"/>
     
-    <!-- Knob -->
-    <circle android:cx="23" android:cy="80" android:radius="6" android:fillColor="#1a1a1a"/>
-    <circle android:cx="23" android:cy="80" android:radius="6" android:strokeWidth="0.8" android:strokeColor="#444" android:fillColor="#00000000"/>
-    <circle android:cx="23" android:cy="80" android:radius="4.5" android:fillColor="#0a0a0a"/>
-    <path android:pathData="M23,80v-5" android:strokeWidth="1" android:strokeColor="#888" android:strokeLineCap="round"/>
-    <circle android:cx="23" android:cy="80" android:radius="1" android:fillColor="#666"/>
+    <!-- Knob as circles using pathData -->
+    <path
+        android:pathData="M 23,80 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"
+        android:fillColor="#1a1a1a"/>
+    <path
+        android:pathData="M 23,80 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"
+        android:strokeWidth="0.8"
+        android:strokeColor="#444"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M 23,80 m -4.5,0 a 4.5,4.5 0 1,0 9,0 a 4.5,4.5 0 1,0 -9,0"
+        android:fillColor="#0a0a0a"/>
+    <path
+        android:pathData="M23,80v-5"
+        android:strokeWidth="1"
+        android:strokeColor="#888"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M 23,80 m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0"
+        android:fillColor="#666"/>
     
     <!-- Fader -->
-    <path android:pathData="M83.5,70h6.5a1.5,1.5 0,0 1,1.5 1.5v13a1.5,1.5 0,0 1,-1.5 1.5h-6.5a1.5,1.5 0,0 1,-1.5 -1.5v-13a1.5,1.5 0,0 1,1.5 -1.5z" android:fillColor="#1a1a1a"/>
-    <path android:pathData="M83.5,70h6.5a1.5,1.5 0,0 1,1.5 1.5v13a1.5,1.5 0,0 1,-1.5 1.5h-6.5a1.5,1.5 0,0 1,-1.5 -1.5v-13a1.5,1.5 0,0 1,1.5 -1.5z" android:strokeWidth="0.6" android:strokeColor="#444" android:fillColor="#00000000"/>
-    <path android:pathData="M84,78h4" android:strokeWidth="0.4" android:strokeColor="#333"/>
-    <path android:pathData="M83.5,76h5.5a0.5,0.5 0,0 1,0.5 0.5v3a0.5,0.5 0,0 1,-0.5 0.5h-5.5a0.5,0.5 0,0 1,-0.5 -0.5v-3a0.5,0.5 0,0 1,0.5 -0.5z" android:fillColor="#0a0a0a"/>
+    <path
+        android:pathData="M83.5,70h6.5a1.5,1.5 0,0 1,1.5 1.5v13a1.5,1.5 0,0 1,-1.5 1.5h-6.5a1.5,1.5 0,0 1,-1.5 -1.5v-13a1.5,1.5 0,0 1,1.5 -1.5z"
+        android:fillColor="#1a1a1a"/>
+    <path
+        android:pathData="M83.5,70h6.5a1.5,1.5 0,0 1,1.5 1.5v13a1.5,1.5 0,0 1,-1.5 1.5h-6.5a1.5,1.5 0,0 1,-1.5 -1.5v-13a1.5,1.5 0,0 1,1.5 -1.5z"
+        android:strokeWidth="0.6"
+        android:strokeColor="#444"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M84,78h4"
+        android:strokeWidth="0.4"
+        android:strokeColor="#333"/>
+    <path
+        android:pathData="M83.5,76h5.5a0.5,0.5 0,0 1,0.5 0.5v3a0.5,0.5 0,0 1,-0.5 0.5h-5.5a0.5,0.5 0,0 1,-0.5 -0.5v-3a0.5,0.5 0,0 1,0.5 -0.5z"
+        android:fillColor="#0a0a0a"/>
 </vector>
