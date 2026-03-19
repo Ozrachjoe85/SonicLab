@@ -2,31 +2,42 @@ package com.soniclab.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Indigo900 = Color(0xFF0A0E27)
-val Indigo800 = Color(0xFF131842)
-val Indigo700 = Color(0xFF1A1F5C)
-val Indigo600 = Color(0xFF232976)
+// === WOOD TONES (Backgrounds) ===
+val WalnutDark = Color(0xFF2C1810)
+val WalnutMid = Color(0xFF4A2C1B)
+val WalnutLight = Color(0xFF6D4C3D)
+val MapleAccent = Color(0xFFD4A574)
 
-val Cyan500 = Color(0xFF00D9FF)
-val Cyan400 = Color(0xFF33E1FF)
-val Cyan600 = Color(0xFF00B8D4)
-val CyanGlow = Color(0xFF00D9FF)
+// === BRUSHED METALS ===
+val BrushedAluminum = Color(0xFF90A4AE)
+val BrushedAluminumLight = Color(0xFFB0BEC5)
+val BrushedGold = Color(0xFFC5A572)
+val ChromeHighlight = Color(0xFFECEFF1)
+val ChromeShadow = Color(0xFF546E7A)
 
-val Amber500 = Color(0xFFFFB020)
-val Amber400 = Color(0xFFFFBF47)
-val Amber600 = Color(0xFFFF9800)
+// === VU METER COLORS ===
+val VUGreen = Color(0xFF4CAF50)
+val VUAmber = Color(0xFFFFB300)
+val VURed = Color(0xFFE53935)
 
-val Gray100 = Color(0xFFF5F5F5)
-val Gray200 = Color(0xFFE0E0E0)
-val Gray300 = Color(0xFFBDBDBD)
-val Gray700 = Color(0xFF616161)
-val Gray900 = Color(0xFF212121)
+// === GLOWING ELEMENTS ===
+val NixieTubeOrange = Color(0xFFFF6E40)
+val TubeGlowWarm = Color(0xFFFF8A50)
+val LEDBlue = Color(0xFF00B0FF)
+val LEDGreen = Color(0xFF00E676)
+val LEDRed = Color(0xFFFF1744)
 
-val Success = Color(0xFF4CAF50)
-val Warning = Color(0xFFFF9800)
-val Error = Color(0xFFEF5350)
+// === PHOSPHOR DISPLAYS ===
+val CRTGreen = Color(0xFF39FF14)
+val CRTAmber = Color(0xFFFFBF00)
+val CRTWhite = Color(0xFFE0E0E0)
 
-val VisualizerPrimary = Cyan500
-val VisualizerSecondary = Amber500
-val VisualizerGradientStart = Color(0xFF00D9FF)
-val VisualizerGradientEnd = Color(0xFF9C27B0)
+// === TEXT & LABELS ===
+val EngravingGold = Color(0xFFD4AF37)
+val LabelWhite = Color(0xFFF5F5F5)
+val LabelGray = Color(0xFFBDBDBD)
+
+// === SHADOWS & DEPTH ===
+val DeepShadow = Color(0xFF000000)
+val SoftShadow = Color(0xFF212121)
+val PanelInset = Color(0xFF1A1A1A)
