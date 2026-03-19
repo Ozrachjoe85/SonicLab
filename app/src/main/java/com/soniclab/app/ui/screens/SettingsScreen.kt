@@ -2,87 +2,47 @@ package com.soniclab.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.soniclab.app.ui.theme.Gray300
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(
+    modifier: Modifier = Modifier
+) {
+    var darkModeEnabled by remember { mutableStateOf(false) }
+    
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.Black)
             .padding(16.dp)
     ) {
         Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 16.dp)
+            text = "Settings Screen",
+            color = Color.White
         )
         
-        SettingItem(
-            icon = Icons.Default.Palette,
-            title = "Theme",
-            subtitle = "Customize app appearance"
-        )
+        Spacer(modifier = Modifier.height(24.dp))
         
-        SettingItem(
-            icon = Icons.Default.MusicNote,
-            title = "Audio Quality",
-            subtitle = "Sample rate, bit depth, output"
-        )
-        
-        SettingItem(
-            icon = Icons.Default.Storage,
-            title = "Storage",
-            subtitle = "Manage cache and downloads"
-        )
-        
-        SettingItem(
-            icon = Icons.Default.Info,
-            title = "About",
-            subtitle = "SonicLab v1.0.0"
-        )
-    }
-}
-
-@Composable
-private fun SettingItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Column {
+        // Settings options
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
+                text = "Dark Mode",
                 color = Gray300
+            )
+            Switch(
+                checked = darkModeEnabled,
+                onCheckedChange = { darkModeEnabled = it }
             )
         }
     }
