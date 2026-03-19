@@ -2,42 +2,32 @@ package com.soniclab.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// === WOOD TONES (Backgrounds) ===
-val WalnutDark = Color(0xFF2C1810)
-val WalnutMid = Color(0xFF4A2C1B)
-val WalnutLight = Color(0xFF6D4C3D)
-val MapleAccent = Color(0xFFD4A574)
+// Primary retro colors
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
 
-// === BRUSHED METALS ===
-val BrushedAluminum = Color(0xFF90A4AE)
-val BrushedAluminumLight = Color(0xFFB0BEC5)
-val BrushedGold = Color(0xFFC5A572)
-val ChromeHighlight = Color(0xFFECEFF1)
-val ChromeShadow = Color(0xFF546E7A)
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)
 
-// === VU METER COLORS ===
-val VUGreen = Color(0xFF4CAF50)
-val VUAmber = Color(0xFFFFB300)
-val VURed = Color(0xFFE53935)
+// Retro palette - Neon colors
+val NeonPink = Color(0xFFFF10F0)
+val NeonBlue = Color(0xFF00F0FF)
+val NeonGreen = Color(0xFF39FF14)
+val NeonOrange = Color(0xFFFF6600)
+val NeonPurple = Color(0xFFBC13FE)
 
-// === GLOWING ELEMENTS ===
-val NixieTubeOrange = Color(0xFFFF6E40)
-val TubeGlowWarm = Color(0xFFFF8A50)
-val LEDBlue = Color(0xFF00B0FF)
-val LEDGreen = Color(0xFF00E676)
-val LEDRed = Color(0xFFFF1744)
+// Retro palette - Pastel colors
+val RetroYellow = Color(0xFFFFD700)
+val RetroCyan = Color(0xFF00CED1)
+val RetroMagenta = Color(0xFFFF00FF)
 
-// === PHOSPHOR DISPLAYS ===
-val CRTGreen = Color(0xFF39FF14)
-val CRTAmber = Color(0xFFFFBF00)
-val CRTWhite = Color(0xFFE0E0E0)
+// Missing colors that caused build errors
+val Gray300 = Color(0xFFD1D5DB)
+val Cyan500 = Color(0xFF06B6D4)
+val Amber500 = Color(0xFFF59E0B)
 
-// === TEXT & LABELS ===
-val EngravingGold = Color(0xFFD4AF37)
-val LabelWhite = Color(0xFFF5F5F5)
-val LabelGray = Color(0xFFBDBDBD)
-
-// === SHADOWS & DEPTH ===
-val DeepShadow = Color(0xFF000000)
-val SoftShadow = Color(0xFF212121)
-val PanelInset = Color(0xFF1A1A1A)
+// Background colors
+val DarkBackground = Color(0xFF0A0A0F)
+val SurfaceDark = Color(0xFF1A1A2E)
