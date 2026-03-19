@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -365,3 +364,180 @@ fun LEDIndicator(
             // Inner glow
             if (isOn) {
                 Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .align(Alignment.Center)
+                        .background(
+                            color = color.copy(alpha = 0.8f),
+                            shape = CircleShape
+                        )
+                )
+            }
+        }
+        
+        if (label.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = LabelGray,
+                fontSize = 8.sp,
+                letterSpacing = 0.5.sp
+            )
+        }
+    }
+}
+
+/**
+ * Nixie tube style digital display
+ */
+@Composable
+fun NixieTubeDisplay(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(DeepShadow, RoundedCornerShape(4.dp))
+            .border(2.dp, ChromeShadow, RoundedCornerShape(4.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 4.sp,
+                shadow = Shadow(
+                    color = NixieTubeOrange,
+                    offset = Offset(0f, 0f),
+                    blurRadius = 12f
+                )
+            ),
+            color = NixieTubeOrange
+        )
+    }
+}
+
+/**
+ * Vintage toggle switch
+ */
+@Composable
+fun ToggleSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = ""
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(28.dp)
+                .background(PanelInset, RoundedCornerShape(14.dp))
+                .border(2.dp, ChromeShadow, RoundedCornerShape(14.dp))
+                .clickable { onCheckedChange(!checked) }
+                .padding(2.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(if (checked) Alignment.CenterEnd else Alignment.CenterStart)
+                    .background(
+                        color = if (checked) LEDGreen else BrushedAluminum,
+                        shape = CircleShape
+                    )
+                    .border(1.dp, ChromeHighlight, CircleShape)
+            )
+        }
+        
+        if (label.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = LabelGray,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+    }
+}
+
+/**
+ * Tape reel animation (decorative)
+ */
+@Composable
+fun TapeReel(
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier,
+    size: Dp = 80.dp
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "tape reel")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (isPlaying) 3000 else 0,
+                easing = LinearEasing
+            )
+        ),
+        label = "rotation"
+    )
+    
+    Box(
+        modifier = modifier.size(size)
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val centerX = size.width / 2
+            val centerY = size.height / 2
+            val outerRadius = size.width / 2
+            val innerRadius = outerRadius * 0.3f
+            
+            // Outer rim
+            drawCircle(
+                color = ChromeShadow,
+                radius = outerRadius,
+                center = Offset(centerX, centerY),
+                style = Stroke(width = 3.dp.toPx())
+            )
+            
+            // Inner hub
+            drawCircle(
+                color = BrushedAluminum,
+                radius = innerRadius,
+                center = Offset(centerX, centerY)
+            )
+            
+            // Spokes
+            rotate(rotation, Offset(centerX, centerY)) {
+                for (i in 0..5) {
+                    val angle = (i * 60.0) * PI / 180
+                    drawLine(
+                        color = ChromeShadow,
+                        start = Offset(
+                            centerX + (cos(angle) * innerRadius).toFloat(),
+                            centerY + (sin(angle) * innerRadius).toFloat()
+                        ),
+                        end = Offset(
+                            centerX + (cos(angle) * (outerRadius - 10f)).toFloat(),
+                            centerY + (sin(angle) * (outerRadius - 10f)).toFloat()
+                        ),
+                        strokeWidth = 2.dp.toPx()
+                    )
+                }
+            }
+            
+            // Center cap
+            drawCircle(
+                color = ChromeHighlight,
+                radius = 8.dp.toPx(),
+                center = Offset(centerX, centerY)
+            )
+        }
+    }
+}
