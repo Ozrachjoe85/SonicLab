@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        
+        <!-- Top curve of S -->
+        <path
+            android:pathData="M 10,-25 Q 20,-25 20,-15 Q 20,-5 10,-5"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="5"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"/>
+        
+        <!-- Middle curve -->
+        <path
+            android:pathData="M 10,-5 Q -5,-5 -5,5 Q -5,15 10,15"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="5"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"/>
+        
+        <!-- Bottom curve -->
+        <path
+            android:pathData="M 10,15 Q 20,15 20,25 Q 20,35 5,35"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="5"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"/>
+        
+        <!-- Glow effect behind -->
+        <path
+            android:pathData="M 10,-25 Q 20,-25 20,-15 Q 20,-5 10,-5 Q -5,-5 -5,5 Q -5,15 10,15 Q 20,15 20,25 Q 20,35 5,35"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="10"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.2"/>
+        
+        <!-- Wave accent lines -->
+        <path
+            android:pathData="M -15,-20 L -15,-10"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.5"/>
+        
+        <path
+            android:pathData="M -20,-18 L -20,-12"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.4"/>
+        
+        <path
+            android:pathData="M 30,20 L 30,30"
+            android:strokeColor="#FFB020"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.5"/>
+        
+        <path
+            android:pathData="M 35,22 L 35,28"
+            android:strokeColor="#00D9FF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.4"/>
+    </group>
+</vector>
