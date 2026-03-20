@@ -13,15 +13,23 @@ import javax.inject.Singleton
 
 /**
  * MusicScanner - Scans device for audio files
+ * 
+ * Uses MediaStore to find all audio files on device
+ * Extracts metadata (title, artist, album, duration)
  */
 @Singleton
 class MusicScanner @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     
+    /**
+     * Scan device for all audio files
+     * Returns list of Track objects
+     */
     suspend fun scanMusicFiles(): List<Track> = withContext(Dispatchers.IO) {
         val tracks = mutableListOf<Track>()
         
+        // Define projection (columns we want)
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -31,10 +39,14 @@ class MusicScanner @Inject constructor(
             MediaStore.Audio.Media.ALBUM_ID
         )
         
+        // Define selection (only music files, not ringtones/notifications)
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         
-        val sortOrder = "${MediaStore.Audio.Media.ARTIST} ASC, ${MediaStore.Audio.Media.ALBUM} ASC"
+        // Sort by artist, then album, then track number
+        val sortOrder = "${MediaStore.Audio.Media.ARTIST} ASC, " +
+                "${MediaStore.Audio.Media.ALBUM} ASC"
         
+        // Query MediaStore
         val cursor: Cursor? = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
@@ -59,11 +71,13 @@ class MusicScanner @Inject constructor(
                 val duration = it.getLong(durationColumn)
                 val albumId = it.getLong(albumIdColumn)
                 
+                // Build content URI for this track
                 val contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     id
                 )
                 
+                // Build album art URI
                 val albumArtUri = ContentUris.withAppendedId(
                     Uri.parse("content://media/external/audio/albumart"),
                     albumId
@@ -86,14 +100,23 @@ class MusicScanner @Inject constructor(
         tracks
     }
     
+    /**
+     * Get tracks by artist
+     */
     suspend fun getTracksByArtist(artist: String): List<Track> = withContext(Dispatchers.IO) {
         scanMusicFiles().filter { it.artist == artist }
     }
     
+    /**
+     * Get tracks by album
+     */
     suspend fun getTracksByAlbum(album: String): List<Track> = withContext(Dispatchers.IO) {
         scanMusicFiles().filter { it.album == album }
     }
     
+    /**
+     * Search tracks by title
+     */
     suspend fun searchTracks(query: String): List<Track> = withContext(Dispatchers.IO) {
         scanMusicFiles().filter { 
             it.title.contains(query, ignoreCase = true) ||
@@ -102,6 +125,9 @@ class MusicScanner @Inject constructor(
         }
     }
     
+    /**
+     * Get all unique artists
+     */
     suspend fun getAllArtists(): List<String> = withContext(Dispatchers.IO) {
         scanMusicFiles()
             .map { it.artist }
@@ -109,6 +135,9 @@ class MusicScanner @Inject constructor(
             .sorted()
     }
     
+    /**
+     * Get all unique albums
+     */
     suspend fun getAllAlbums(): List<String> = withContext(Dispatchers.IO) {
         scanMusicFiles()
             .map { it.album }
