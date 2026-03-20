@@ -1,6 +1,7 @@
 package com.soniclab.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,158 +15,188 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.soniclab.app.ui.adaptive.AdaptiveLayout
-import com.soniclab.app.ui.adaptive.ScreenConfig
+import com.soniclab.app.playback.RepeatMode
 import com.soniclab.app.ui.theme.sonicColors
-import com.soniclab.app.ui.theme.sonicEffects
 
 @Composable
 fun NowPlayingScreen(
     modifier: Modifier = Modifier,
     viewModel: NowPlayingViewModel = hiltViewModel()
 ) {
-    AdaptiveLayout(
-        compact = { config -> CompactNowPlaying(config, viewModel, modifier) },
-        medium = { config -> CompactNowPlaying(config, viewModel, modifier) },
-        wide = { config -> CompactNowPlaying(config, viewModel, modifier) },
-        extraWide = { config -> CompactNowPlaying(config, viewModel, modifier) }
-    )
-}
-
-@Composable
-private fun CompactNowPlaying(
-    config: ScreenConfig,
-    viewModel: NowPlayingViewModel,
-    modifier: Modifier = Modifier
-) {
     val colors = sonicColors
-    val effects = sonicEffects
     val scrollState = rememberScrollState()
     
-    // Collect state from ViewModel
-    val isPlaying by viewModel.isPlaying.collectAsState()
     val currentTrack by viewModel.currentTrack.collectAsState()
+    val isPlaying by viewModel.isPlaying.collectAsState()
     val progress by viewModel.progress.collectAsState()
     val currentPosition by viewModel.currentPosition.collectAsState()
     val duration by viewModel.duration.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val shuffleEnabled by viewModel.shuffleEnabled.collectAsState()
+    val repeatMode by viewModel.repeatMode.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
     
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(colors.background)
-    ) {
+    var showMenu by remember { mutableStateOf(false) }
+    
+    Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(colors.background)
                 .verticalScroll(scrollState)
                 .padding(24.dp)
-                .padding(bottom = 80.dp), // Extra padding for bottom nav
+                .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            // Top controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = viewModel::toggleShuffle) {
+                    Icon(
+                        Icons.Default.Shuffle,
+                        contentDescription = "Shuffle",
+                        tint = if (shuffleEnabled) colors.primary else colors.textTertiary
+                    )
+                }
+                
+                Text(
+                    text = "NOW PLAYING",
+                    color = colors.textSecondary,
+                    fontSize = 12.sp,
+                    letterSpacing = 2.sp
+                )
+                
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "Menu",
+                            tint = colors.textTertiary
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Add to playlist") },
+                            onClick = { showMenu = false }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Go to artist") },
+                            onClick = { showMenu = false }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Go to album") },
+                            onClick = { showMenu = false }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Share") },
+                            onClick = { showMenu = false }
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
             
             // Album art
             Box(
                 modifier = Modifier
-                    .size(280.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.radialGradient(
-                            listOf(
-                                colors.primary.copy(alpha = 0.3f),
-                                colors.secondary.copy(alpha = 0.2f),
-                                colors.background
-                            )
-                        )
-                    )
-                    .clickable { viewModel.togglePlayPause() },
-                contentAlignment = Alignment.Center
+                    .size(300.dp)
+                    .clip(RoundedCornerShape(24.dp))
             ) {
                 if (currentTrack?.albumArtUri != null) {
-                    // Load actual album art
                     AsyncImage(
                         model = currentTrack?.albumArtUri,
-                        contentDescription = "Album Art",
+                        contentDescription = "Album art",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Placeholder
-                    Icon(
-                        imageVector = Icons.Default.Album,
-                        contentDescription = "Album Art",
-                        modifier = Modifier.size(120.dp),
-                        tint = colors.textSecondary.copy(alpha = 0.3f)
-                    )
-                }
-                
-                if (effects.showHolographicRim) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                brush = Brush.linearGradient(
-                                    listOf(
-                                        colors.primary.copy(alpha = 0.1f),
-                                        colors.secondary.copy(alpha = 0.1f),
-                                        colors.tertiary.copy(alpha = 0.1f)
-                                    )
-                                )
-                            )
-                    )
+                            .background(colors.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.MusicNote,
+                            contentDescription = null,
+                            modifier = Modifier.size(120.dp),
+                            tint = colors.textSecondary.copy(alpha = 0.3f)
+                        )
+                    }
                 }
+                
+                // Holographic rim effect
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(
+                            2.dp,
+                            Brush.linearGradient(
+                                listOf(
+                                    colors.primary.copy(alpha = 0.5f),
+                                    colors.secondary.copy(alpha = 0.5f)
+                                )
+                            ),
+                            RoundedCornerShape(24.dp)
+                        )
+                )
             }
             
             Spacer(modifier = Modifier.height(32.dp))
             
             // Track info
             Text(
-                text = currentTrack?.title?.uppercase() ?: "NO TRACK LOADED",
+                text = currentTrack?.title ?: "No track playing",
                 color = colors.textPrimary,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
+                fontWeight = FontWeight.Bold
             )
             
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "${currentTrack?.artist?.uppercase() ?: "UNKNOWN ARTIST"} • ${currentTrack?.album?.uppercase() ?: "UNKNOWN ALBUM"}",
+                text = currentTrack?.artist ?: "",
                 color = colors.textSecondary,
-                fontSize = 13.sp,
-                letterSpacing = 1.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                fontSize = 16.sp
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             
-            // Progress bar (now interactive!)
+            Text(
+                text = currentTrack?.album ?: "",
+                color = colors.textTertiary,
+                fontSize = 14.sp
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Progress bar
             Column(modifier = Modifier.fillMaxWidth()) {
                 Slider(
                     value = progress,
                     onValueChange = { viewModel.seekTo(it) },
-                    modifier = Modifier.fillMaxWidth(),
                     colors = SliderDefaults.colors(
                         thumbColor = colors.primary,
                         activeTrackColor = colors.primary,
-                        inactiveTrackColor = colors.border.copy(alpha = 0.3f)
+                        inactiveTrackColor = colors.border
                     )
                 )
                 
@@ -173,145 +204,165 @@ private fun CompactNowPlaying(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(currentPosition, color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                    Text(duration, color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(currentPosition, color = colors.textSecondary, fontSize = 12.sp)
+                    Text(duration, color = colors.textSecondary, fontSize = 12.sp)
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // VU meters (react to playback state)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("VU", color = colors.textTertiary, fontSize = 9.sp, letterSpacing = 1.sp)
-                Spacer(modifier = Modifier.width(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    repeat(8) { i ->
-                        Box(
-                            modifier = Modifier
-                                .width(3.dp)
-                                .height(12.dp)
-                                .background(
-                                    when {
-                                        i < 4 -> colors.vuLow.copy(alpha = if (isPlaying) 0.7f else 0.3f)
-                                        i < 6 -> colors.vuMid.copy(alpha = if (isPlaying) 0.5f else 0.2f)
-                                        else -> colors.vuHigh.copy(alpha = if (isPlaying) 0.3f else 0.1f)
-                                    }
-                                )
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("L", color = colors.textTertiary, fontSize = 9.sp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("R", color = colors.textTertiary, fontSize = 9.sp)
-                Spacer(modifier = Modifier.width(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    repeat(8) { i ->
-                        Box(
-                            modifier = Modifier
-                                .width(3.dp)
-                                .height(12.dp)
-                                .background(
-                                    when {
-                                        i < 5 -> colors.vuLow.copy(alpha = if (isPlaying) 0.8f else 0.3f)
-                                        i < 7 -> colors.vuMid.copy(alpha = if (isPlaying) 0.5f else 0.2f)
-                                        else -> colors.vuHigh.copy(alpha = if (isPlaying) 0.2f else 0.1f)
-                                    }
-                                )
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Playback controls (now functional!)
+            // Playback controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { viewModel.playPrevious() },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
+                // Repeat button
+                IconButton(onClick = viewModel::cycleRepeatMode) {
+                    Icon(
+                        when (repeatMode) {
+                            RepeatMode.OFF -> Icons.Default.Repeat
+                            RepeatMode.ALL -> Icons.Default.Repeat
+                            RepeatMode.ONE -> Icons.Default.RepeatOne
+                        },
+                        contentDescription = "Repeat",
+                        tint = if (repeatMode != RepeatMode.OFF) colors.primary else colors.textTertiary,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
                 
+                // Previous button
+                IconButton(
+                    onClick = viewModel::playPrevious,
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Icon(
+                        Icons.Default.SkipPrevious,
+                        contentDescription = "Previous",
+                        tint = colors.textPrimary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                
+                // Play/Pause button
                 Box(
                     modifier = Modifier
-                        .size(72.dp)
+                        .size(80.dp)
+                        .clip(CircleShape)
                         .background(
-                            brush = Brush.radialGradient(
+                            Brush.radialGradient(
                                 listOf(
                                     if (isPlaying) colors.primary else colors.secondary,
-                                    if (isPlaying) colors.primary.copy(alpha = 0.3f) else colors.secondary.copy(alpha = 0.3f),
-                                    Color.Transparent
+                                    if (isPlaying) colors.primary.copy(0.7f) else colors.secondary.copy(0.7f)
                                 )
-                            ),
-                            shape = CircleShape
+                            )
                         )
                         .clickable { viewModel.togglePlayPause() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        if (isPlaying) "Pause" else "Play",
-                        modifier = Modifier.size(40.dp),
-                        tint = colors.textPrimary
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(40.dp)
                     )
                 }
                 
+                // Next button
                 IconButton(
-                    onClick = { viewModel.playNext() },
-                    modifier = Modifier.size(48.dp)
+                    onClick = viewModel::playNext,
+                    modifier = Modifier.size(56.dp)
                 ) {
-                    Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
+                    Icon(
+                        Icons.Default.SkipNext,
+                        contentDescription = "Next",
+                        tint = colors.textPrimary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                
+                // Favorite button
+                IconButton(onClick = viewModel::toggleFavorite) {
+                    Icon(
+                        if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) colors.secondary else colors.textTertiary,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
-            // Quick actions
+            // VU Meters (visual only for now)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                IconButton(onClick = {}) { Icon(Icons.Default.Shuffle, "Shuffle", tint = colors.textSecondary) }
-                IconButton(onClick = {}) { Icon(Icons.Default.Repeat, "Repeat", tint = colors.textSecondary) }
-                IconButton(onClick = {}) { Icon(Icons.Default.FavoriteBorder, "Favorite", tint = colors.textSecondary) }
-                IconButton(onClick = {}) { Icon(Icons.Default.MoreVert, "More", tint = colors.textSecondary) }
+                VUMeter(isPlaying, "L")
+                VUMeter(isPlaying, "R")
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
         }
         
-        // Loading indicator
+        // Loading overlay
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = colors.primary
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colors.background.copy(alpha = 0.8f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = colors.primary)
+            }
         }
         
-        // Error message
-        errorMessage?.let { error ->
+        // Error snackbar
+        errorMessage?.let { message ->
             Snackbar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp),
                 action = {
-                    TextButton(onClick = { viewModel.clearError() }) {
-                        Text("OK", color = colors.primary)
+                    TextButton(onClick = { viewModel.retryLoadMusic() }) {
+                        Text("RETRY", color = colors.primary)
                     }
                 }
             ) {
-                Text(error)
+                Text(message)
             }
         }
+    }
+}
+
+@Composable
+private fun VUMeter(isActive: Boolean, label: String) {
+    val colors = sonicColors
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .width(60.dp)
+                .height(120.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(colors.surface)
+                .border(1.dp, colors.border, RoundedCornerShape(8.dp))
+        ) {
+            // VU meter bars (visual only)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.6f)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                colors.secondary.copy(alpha = if (isActive) 0.8f else 0.2f),
+                                colors.primary.copy(alpha = if (isActive) 0.6f else 0.1f)
+                            )
+                        )
+                    )
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(label, color = colors.textTertiary, fontSize = 12.sp)
     }
 }
