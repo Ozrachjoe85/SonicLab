@@ -464,6 +464,7 @@ private fun PlaylistsGrid() {
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
-}
+        }
     }
+}
 }
