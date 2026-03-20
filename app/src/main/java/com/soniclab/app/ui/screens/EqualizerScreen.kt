@@ -32,6 +32,9 @@ data class EQPreset(
 fun EqualizerScreen(
     modifier: Modifier = Modifier
 ) {
+    val themeManager = LocalThemeManager.current
+    val colors = themeManager.colors
+    
     // EQ state
     var eqBands by remember {
         mutableStateOf(List(32) { 0.5f }) // 0.5 = center/flat (0dB)
@@ -78,6 +81,11 @@ fun EqualizerScreen(
     CosmicVoidPanel(
         modifier = modifier.fillMaxSize()
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
