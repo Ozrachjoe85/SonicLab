@@ -10,18 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.soniclab.app.ui.screens.CollectionScreen
-import com.soniclab.app.ui.screens.LabScreen
-import com.soniclab.app.ui.screens.NowPlayingScreen
-import com.soniclab.app.ui.screens.VisualsScreen
+import com.soniclab.app.ui.screens.*
 import com.soniclab.app.ui.theme.SonicLabTheme
 import com.soniclab.app.ui.theme.sonicColors
 import com.soniclab.app.util.PermissionHandler
 import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * Main Activity - FULLY WIRED with ALL working screens
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     
@@ -31,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         permissionHandler = PermissionHandler(this) { granted ->
-            // Permissions result - UI will react via ViewModel
+            // Permission result handled by ViewModel
         }
         
         if (!permissionHandler.hasPermissions(this)) {
@@ -47,10 +41,11 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object NowPlaying : Screen("now_playing", "Now Playing", Icons.Default.PlayArrow)
-    object Collection : Screen("collection", "Collection", Icons.Default.LibraryMusic)
+    object NowPlaying : Screen("now_playing", "Playing", Icons.Default.PlayArrow)
+    object Collection : Screen("collection", "Library", Icons.Default.LibraryMusic)
     object Visuals : Screen("visuals", "Visuals", Icons.Default.GraphicEq)
-    object Lab : Screen("lab", "Lab", Icons.Default.Settings)
+    object Lab : Screen("lab", "Lab", Icons.Default.Tune)
+    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +58,8 @@ fun MainScreen() {
         Screen.NowPlaying,
         Screen.Collection,
         Screen.Visuals,
-        Screen.Lab
+        Screen.Lab,
+        Screen.Settings
     )
     
     Scaffold(
@@ -108,6 +104,7 @@ fun MainScreen() {
                 Screen.Collection -> CollectionScreen()
                 Screen.Visuals -> VisualsScreen()
                 Screen.Lab -> LabScreen()
+                Screen.Settings -> SettingsScreen()
             }
         }
     }
