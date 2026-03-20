@@ -16,34 +16,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.soniclab.app.ui.adaptive.AdaptiveLayout
-import com.soniclab.app.ui.adaptive.AdaptiveSizing
 import com.soniclab.app.ui.adaptive.ScreenConfig
 import com.soniclab.app.ui.theme.sonicColors
 import com.soniclab.app.ui.theme.sonicEffects
 
 @Composable
-fun NowPlayingScreen(modifier: Modifier = Modifier) {
+fun NowPlayingScreen(
+    modifier: Modifier = Modifier,
+    viewModel: NowPlayingViewModel = hiltViewModel()
+) {
     AdaptiveLayout(
-        compact = { config -> CompactNowPlaying(config, modifier) },
-        medium = { config -> CompactNowPlaying(config, modifier) },
-        wide = { config -> CompactNowPlaying(config, modifier) },
-        extraWide = { config -> CompactNowPlaying(config, modifier) }
+        compact = { config -> CompactNowPlaying(config, viewModel, modifier) },
+        medium = { config -> CompactNowPlaying(config, viewModel, modifier) },
+        wide = { config -> CompactNowPlaying(config, viewModel, modifier) },
+        extraWide = { config -> CompactNowPlaying(config, viewModel, modifier) }
     )
 }
 
 @Composable
-private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifier) {
+private fun CompactNowPlaying(
+    config: ScreenConfig,
+    viewModel: NowPlayingViewModel,
+    modifier: Modifier = Modifier
+) {
     val colors = sonicColors
     val effects = sonicEffects
-    var isPlaying by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0.35f) }
     val scrollState = rememberScrollState()
+    
+    val isPlaying by viewModel.isPlaying.collectAsState()
+    val currentTrack by viewModel.currentTrack.collectAsState()
+    val progress by viewModel.progress.collectAsState()
+    val currentPosition by viewModel.currentPosition.collectAsState()
+    val duration by viewModel.duration.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     
     Box(
         modifier = modifier
@@ -55,12 +70,11 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(24.dp)
-                .padding(bottom = 80.dp), // Extra padding for bottom nav
+                .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Album art
             Box(
                 modifier = Modifier
                     .size(280.dp)
@@ -74,15 +88,24 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                             )
                         )
                     )
-                    .clickable { isPlaying = !isPlaying },
+                    .clickable { viewModel.togglePlayPause() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Album,
-                    contentDescription = "Album Art",
-                    modifier = Modifier.size(120.dp),
-                    tint = colors.textSecondary.copy(alpha = 0.3f)
-                )
+                if (currentTrack?.albumArtUri != null) {
+                    AsyncImage(
+                        model = currentTrack?.albumArtUri,
+                        contentDescription = "Album Art",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Album,
+                        contentDescription = "Album Art",
+                        modifier = Modifier.size(120.dp),
+                        tint = colors.textSecondary.copy(alpha = 0.3f)
+                    )
+                }
                 
                 if (effects.showHolographicRim) {
                     Box(
@@ -105,12 +128,12 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "COSMIC FREQUENCY",
+                text = currentTrack?.title?.uppercase() ?: "NO TRACK LOADED",
                 color = colors.textPrimary,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
@@ -118,7 +141,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "SONIC LAB • DIGITAL DREAMS",
+                text = "${currentTrack?.artist?.uppercase() ?: "UNKNOWN ARTIST"} • ${currentTrack?.album?.uppercase() ?: "UNKNOWN ALBUM"}",
                 color = colors.textSecondary,
                 fontSize = 13.sp,
                 letterSpacing = 1.sp,
@@ -128,32 +151,29 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Progress bar
             Column(modifier = Modifier.fillMaxWidth()) {
-                LinearProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
-                    color = colors.primary,
-                    trackColor = colors.border.copy(alpha = 0.3f)
+                Slider(
+                    value = progress,
+                    onValueChange = { viewModel.seekTo(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = colors.primary,
+                        activeTrackColor = colors.primary,
+                        inactiveTrackColor = colors.border.copy(alpha = 0.3f)
+                    )
                 )
-                
-                Spacer(modifier = Modifier.height(8.dp))
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("1:23", color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                    Text("3:42", color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(currentPosition, color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(duration, color = colors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // VU meters
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -169,9 +189,9 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                                 .height(12.dp)
                                 .background(
                                     when {
-                                        i < 4 -> colors.vuLow.copy(alpha = 0.7f)
-                                        i < 6 -> colors.vuMid.copy(alpha = 0.5f)
-                                        else -> colors.vuHigh.copy(alpha = 0.3f)
+                                        i < 4 -> colors.vuLow.copy(alpha = if (isPlaying) 0.7f else 0.3f)
+                                        i < 6 -> colors.vuMid.copy(alpha = if (isPlaying) 0.5f else 0.2f)
+                                        else -> colors.vuHigh.copy(alpha = if (isPlaying) 0.3f else 0.1f)
                                     }
                                 )
                         )
@@ -190,9 +210,9 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                                 .height(12.dp)
                                 .background(
                                     when {
-                                        i < 5 -> colors.vuLow.copy(alpha = 0.8f)
-                                        i < 7 -> colors.vuMid.copy(alpha = 0.5f)
-                                        else -> colors.vuHigh.copy(alpha = 0.2f)
+                                        i < 5 -> colors.vuLow.copy(alpha = if (isPlaying) 0.8f else 0.3f)
+                                        i < 7 -> colors.vuMid.copy(alpha = if (isPlaying) 0.5f else 0.2f)
+                                        else -> colors.vuHigh.copy(alpha = if (isPlaying) 0.2f else 0.1f)
                                     }
                                 )
                         )
@@ -202,13 +222,15 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            // Playback controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {}, modifier = Modifier.size(48.dp)) {
+                IconButton(
+                    onClick = { viewModel.playPrevious() },
+                    modifier = Modifier.size(48.dp)
+                ) {
                     Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
                 }
                 
@@ -225,7 +247,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                             ),
                             shape = CircleShape
                         )
-                        .clickable { isPlaying = !isPlaying },
+                        .clickable { viewModel.togglePlayPause() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -236,14 +258,16 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                     )
                 }
                 
-                IconButton(onClick = {}, modifier = Modifier.size(48.dp)) {
+                IconButton(
+                    onClick = { viewModel.playNext() },
+                    modifier = Modifier.size(48.dp)
+                ) {
                     Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
                 }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Quick actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -255,6 +279,28 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             }
             
             Spacer(modifier = Modifier.height(24.dp))
+        }
+        
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = colors.primary
+            )
+        }
+        
+        errorMessage?.let { error ->
+            Snackbar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                action = {
+                    TextButton(onClick = { viewModel.clearError() }) {
+                        Text("OK", color = colors.primary)
+                    }
+                }
+            ) {
+                Text(error)
+            }
         }
     }
 }
