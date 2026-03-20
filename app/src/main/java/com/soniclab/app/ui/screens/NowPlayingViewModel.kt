@@ -1,14 +1,21 @@
 package com.soniclab.app.ui.screens
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.soniclab.app.playback.MusicScanner
 import com.soniclab.app.playback.PlayerManager
+import com.soniclab.app.playback.RepeatMode
 import com.soniclab.app.playback.Track
+import com.soniclab.app.service.MusicPlaybackService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,9 +26,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * NowPlayingViewModel - Enhanced with permission checking
- */
 @HiltViewModel
 class NowPlayingViewModel @Inject constructor(
     private val playerManager: PlayerManager,
@@ -31,6 +35,8 @@ class NowPlayingViewModel @Inject constructor(
     
     val isPlaying: StateFlow<Boolean> = playerManager.isPlaying
     val currentTrack: StateFlow<Track?> = playerManager.currentTrack
+    val shuffleEnabled: StateFlow<Boolean> = playerManager.shuffleEnabled
+    val repeatMode: StateFlow<RepeatMode> = playerManager.repeatMode
     
     private val _progress = MutableStateFlow(0f)
     val progress: StateFlow<Float> = _progress.asStateFlow()
@@ -47,15 +53,52 @@ class NowPlayingViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
     
-    private val _trackCount = MutableStateFlow(0)
-    val trackCount: StateFlow<Int> = _trackCount.asStateFlow()
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
     
     private var progressJob: Job? = null
+    private var playbackService: MusicPlaybackService? = null
+    private var serviceBound = false
+    
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            serviceBound = true
+        }
+        
+        override fun onServiceDisconnected(name: ComponentName?) {
+            serviceBound = false
+        }
+    }
     
     init {
         playerManager.initialize()
         startProgressTracking()
         checkPermissionsAndLoad()
+        startPlaybackService()
+        
+        // Monitor playback state to update notification
+        viewModelScope.launch {
+            isPlaying.collect { playing ->
+                if (serviceBound) {
+                    playbackService?.updateNotification()
+                }
+            }
+        }
+    }
+    
+    private fun startPlaybackService() {
+        val intent = Intent(getApplication(), MusicPlaybackService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getApplication<Application>().startForegroundService(intent)
+        } else {
+            getApplication<Application>().startService(intent)
+        }
+        
+        getApplication<Application>().bindService(
+            intent,
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
     }
     
     private fun checkPermissionsAndLoad() {
@@ -74,7 +117,7 @@ class NowPlayingViewModel @Inject constructor(
         if (hasPermission) {
             loadMusicFiles()
         } else {
-            _errorMessage.value = "Permission required to access music files. Please grant permission in app settings."
+            _errorMessage.value = "Permission required to access music files"
         }
     }
     
@@ -90,19 +133,16 @@ class NowPlayingViewModel @Inject constructor(
                 _errorMessage.value = null
                 
                 val tracks = musicScanner.scanMusicFiles()
-                _trackCount.value = tracks.size
                 
                 if (tracks.isNotEmpty()) {
                     playerManager.setQueueAndPlay(tracks, 0)
-                    playerManager.pause() // Start paused
+                    playerManager.pause()
                     _errorMessage.value = null
                 } else {
-                    _errorMessage.value = "No music files found. Please add music to your device and try again."
+                    _errorMessage.value = "No music files found"
                 }
-            } catch (e: SecurityException) {
-                _errorMessage.value = "Permission denied. Please grant storage permission in Settings."
             } catch (e: Exception) {
-                _errorMessage.value = "Error loading music: ${e.message}\n\nTrying to find: MP3, FLAC, AAC files in Music/Downloads folders."
+                _errorMessage.value = "Error: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
@@ -152,12 +192,24 @@ class NowPlayingViewModel @Inject constructor(
         playerManager.seekTo(position)
     }
     
-    fun clearError() {
-        _errorMessage.value = null
+    fun toggleShuffle() {
+        playerManager.toggleShuffle()
+    }
+    
+    fun cycleRepeatMode() {
+        playerManager.cycleRepeatMode()
+    }
+    
+    fun toggleFavorite() {
+        _isFavorite.value = !_isFavorite.value
+        // TODO: Save to favorites database in Phase 3
     }
     
     override fun onCleared() {
         super.onCleared()
         progressJob?.cancel()
+        if (serviceBound) {
+            getApplication<Application>().unbindService(serviceConnection)
+        }
     }
 }
