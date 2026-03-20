@@ -15,34 +15,32 @@ import com.soniclab.app.ui.theme.*
 fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
-    // State for interactive controls
     var volumeValue by remember { mutableStateOf(0.7f) }
     var balanceValue by remember { mutableStateOf(0.5f) }
-    var toneValue by remember { mutableStateOf(0.6f) }
+    var frequencyValue by remember { mutableStateOf(0.6f) }
     
-    var loudnessEnabled by remember { mutableStateOf(false) }
-    var monoEnabled by remember { mutableStateOf(false) }
-    var filterEnabled by remember { mutableStateOf(true) }
+    var quantumMode by remember { mutableStateOf(true) }
+    var analogWarmth by remember { mutableStateOf(false) }
+    var glitchFX by remember { mutableStateOf(true) }
     
-    var isPlaying by remember { mutableStateOf(true) }
+    var isStreaming by remember { mutableStateOf(true) }
     
-    // Simulated VU meter levels (will be real audio levels in Phase 3)
-    val leftLevel by remember { mutableStateOf(0.65f) }
-    val rightLevel by remember { mutableStateOf(0.72f) }
+    val leftSignal by remember { mutableStateOf(0.68f) }
+    val rightSignal by remember { mutableStateOf(0.75f) }
     
-    WoodPanel(
+    CosmicVoidPanel(
         modifier = modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // ============================================
-            // HEADER - Brushed metal with LEDs
+            // COSMIC HEADER
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -52,47 +50,47 @@ fun HomeScreen(
                 ) {
                     Column {
                         Text(
-                            text = "SONIC LAB",
-                            color = EngravingGold,
-                            fontSize = 24.sp,
+                            text = "◢ SONIC LAB ◣",
+                            color = NeonCyan,
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 4.sp
                         )
                         Text(
-                            text = "PROFESSIONAL AUDIO SYSTEM",
-                            color = LabelGray,
-                            fontSize = 10.sp,
+                            text = "CYBER-ANALOG-DIGITAL MATRIX",
+                            color = PlasmaViolet,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
                         )
                     }
                     
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        LEDIndicator(
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        NeonLED(
                             isOn = true,
-                            color = LEDGreen,
-                            label = "PWR"
+                            color = NeonGreen,
+                            label = "SYS"
                         )
-                        LEDIndicator(
-                            isOn = isPlaying,
-                            color = LEDRed,
-                            label = "REC"
+                        NeonLED(
+                            isOn = isStreaming,
+                            color = NeonPink,
+                            label = "TX"
                         )
                     }
                 }
             }
             
             // ============================================
-            // VU METERS
+            // HOLOGRAPHIC VU METERS
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
                     Text(
-                        text = "LEVEL METERS",
-                        color = LabelGray,
-                        fontSize = 12.sp,
+                        text = "▶ SIGNAL ANALYSIS",
+                        color = GridPurple,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -102,47 +100,47 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        VUMeter(
-                            level = leftLevel,
-                            label = "LEFT"
+                        HolographicVUMeter(
+                            level = leftSignal,
+                            label = "L-CHANNEL"
                         )
-                        VUMeter(
-                            level = rightLevel,
-                            label = "RIGHT"
+                        HolographicVUMeter(
+                            level = rightSignal,
+                            label = "R-CHANNEL"
                         )
                     }
                 }
             }
             
             // ============================================
-            // NOW PLAYING
+            // HOLOGRAPHIC TIME DISPLAY
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "NOW PLAYING",
-                        color = LabelGray,
-                        fontSize = 12.sp,
+                        text = "◆ DATA STREAM ◆",
+                        color = GridCyan,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    NixieTubeDisplay(
+                    HolographicDisplay(
                         text = "03:42"
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Text(
-                        text = if (isPlaying) "DEMO TRACK - SAMPLE AUDIO" else "READY - NO TRACK",
-                        color = if (isPlaying) LabelWhite else LabelGray,
-                        fontSize = 11.sp,
+                        text = if (isStreaming) "⟨ COSMIC FREQUENCY ACTIVE ⟩" else "⟨ SYSTEM STANDBY ⟩",
+                        color = if (isStreaming) NeonPink else Gray300,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
@@ -150,49 +148,52 @@ fun HomeScreen(
             }
             
             // ============================================
-            // TAPE DECK
+            // DATA STREAM REELS
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TapeReel(
-                        isPlaying = isPlaying,
-                        size = 50.dp
-                    )
-                    TapeReel(
-                        isPlaying = isPlaying,
-                        size = 50.dp
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        DataStreamReel(
+                            isActive = isStreaming,
+                            size = 55.dp
+                        )
+                        DataStreamReel(
+                            isActive = isStreaming,
+                            size = 55.dp
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = if (isStreaming) "◀◀ TRANSMITTING ▶▶" else "◀ PAUSE ▶",
+                        color = if (isStreaming) NeonCyan else PlasmaViolet,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 3.sp
                     )
                 }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text(
-                    text = if (isPlaying) "⏸ PAUSE" else "▶ PLAY",
-                    color = NixieTubeOrange,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
             }
             
             // ============================================
-            // ROTARY KNOBS
+            // PLASMA CONTROL MATRIX
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
                     Text(
-                        text = "AUDIO CONTROLS",
-                        color = LabelGray,
-                        fontSize = 12.sp,
+                        text = "⦿ PLASMA MATRIX ⦿",
+                        color = PlasmaMagenta,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -202,50 +203,61 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        RotaryKnob(
+                        PlasmaKnob(
                             value = volumeValue,
                             onValueChange = { volumeValue = it },
-                            label = "VOLUME"
+                            label = "AMPLITUDE"
                         )
-                        RotaryKnob(
+                        PlasmaKnob(
                             value = balanceValue,
                             onValueChange = { balanceValue = it },
                             label = "BALANCE"
                         )
-                        RotaryKnob(
-                            value = toneValue,
-                            onValueChange = { toneValue = it },
-                            label = "TONE"
+                        PlasmaKnob(
+                            value = frequencyValue,
+                            onValueChange = { frequencyValue = it },
+                            label = "FREQUENCY"
                         )
                     }
                 }
             }
             
             // ============================================
-            // TOGGLE SWITCHES
+            // ENERGY SWITCHES
             // ============================================
-            BrushedMetalPanel(
+            DigitalGridPanel(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    ToggleSwitch(
-                        checked = loudnessEnabled,
-                        onCheckedChange = { loudnessEnabled = it },
-                        label = "LOUDNESS"
+                Column {
+                    Text(
+                        text = "⚡ SYSTEM MATRIX ⚡",
+                        color = EnergyFlare,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    ToggleSwitch(
-                        checked = monoEnabled,
-                        onCheckedChange = { monoEnabled = it },
-                        label = "MONO"
-                    )
-                    ToggleSwitch(
-                        checked = filterEnabled,
-                        onCheckedChange = { filterEnabled = it },
-                        label = "FILTER"
-                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        EnergySwitch(
+                            checked = quantumMode,
+                            onCheckedChange = { quantumMode = it },
+                            label = "QUANTUM"
+                        )
+                        EnergySwitch(
+                            checked = analogWarmth,
+                            onCheckedChange = { analogWarmth = it },
+                            label = "ANALOG"
+                        )
+                        EnergySwitch(
+                            checked = glitchFX,
+                            onCheckedChange = { glitchFX = it },
+                            label = "GLITCH"
+                        )
+                    }
                 }
             }
         }
