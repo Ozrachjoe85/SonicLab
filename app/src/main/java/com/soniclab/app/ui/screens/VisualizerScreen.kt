@@ -591,6 +591,7 @@ private fun Spatial3DVisualization(audioData: List<Float>, isPlaying: Boolean) {
             }
         }
     }
-}
+        }
     }
+}
 }
