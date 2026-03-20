@@ -12,6 +12,10 @@ import javax.inject.Singleton
 
 /**
  * Hilt module for playback-related dependencies
+ * 
+ * Provides singleton instances of:
+ * - PlayerManager (audio playback controller)
+ * - MusicScanner (device music discovery)
  */
 @Module
 @InstallIn(SingletonComponent::class)
