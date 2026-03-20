@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -198,7 +197,9 @@ private fun CompactNowPlaying(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 // Left channel
-                Row(spacing = 2.dp) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
                     repeat(8) { index ->
                         Box(
                             modifier = Modifier
@@ -228,7 +229,9 @@ private fun CompactNowPlaying(
                     fontSize = 9.sp
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Row(spacing = 2.dp) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
                     repeat(8) { index ->
                         Box(
                             modifier = Modifier
