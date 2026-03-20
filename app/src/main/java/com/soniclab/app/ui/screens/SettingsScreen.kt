@@ -37,7 +37,9 @@ enum class AppTheme {
 fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
-    var selectedTheme by remember { mutableStateOf(AppTheme.CYBER_DIGITAL_GHOST) }
+    val themeManager = LocalThemeManager.current
+    val currentColors = themeManager.colors
+    
     var showTapeReels by remember { mutableStateOf(true) }
     var showWaveform by remember { mutableStateOf(true) }
     var visualizationIntensity by remember { mutableStateOf(0.7f) }
@@ -117,8 +119,8 @@ fun SettingsScreen(
                             name = "Cyber-Digital-Ghost",
                             description = "Neon circuits, holographic displays, cosmic energy",
                             colors = listOf(NeonCyan, PlasmaViolet, NeonPink),
-                            isSelected = selectedTheme == AppTheme.CYBER_DIGITAL_GHOST,
-                            onClick = { selectedTheme = AppTheme.CYBER_DIGITAL_GHOST }
+                            isSelected = themeManager.currentTheme == AppTheme.CYBER_DIGITAL_GHOST,
+                            onClick = { themeManager.setTheme(AppTheme.CYBER_DIGITAL_GHOST) }
                         )
                         
                         ThemeOption(
@@ -126,8 +128,8 @@ fun SettingsScreen(
                             name = "Pure Analog Warmth",
                             description = "Vintage tubes, warm glow, analog meters",
                             colors = listOf(Color(0xFFFF9955), Color(0xFFFFD700), Color(0xFFFF6E40)),
-                            isSelected = selectedTheme == AppTheme.PURE_ANALOG_WARMTH,
-                            onClick = { selectedTheme = AppTheme.PURE_ANALOG_WARMTH }
+                            isSelected = themeManager.currentTheme == AppTheme.PURE_ANALOG_WARMTH,
+                            onClick = { themeManager.setTheme(AppTheme.PURE_ANALOG_WARMTH) }
                         )
                         
                         ThemeOption(
@@ -135,8 +137,8 @@ fun SettingsScreen(
                             name = "Tapedeck Retro",
                             description = "Cassette aesthetic, spinning reels, mechanical",
                             colors = listOf(Color(0xFF8B4513), Color(0xFFC0C0C0), Color(0xFF000000)),
-                            isSelected = selectedTheme == AppTheme.TAPEDECK_RETRO,
-                            onClick = { selectedTheme = AppTheme.TAPEDECK_RETRO }
+                            isSelected = themeManager.currentTheme == AppTheme.TAPEDECK_RETRO,
+                            onClick = { themeManager.setTheme(AppTheme.TAPEDECK_RETRO) }
                         )
                         
                         ThemeOption(
@@ -144,8 +146,8 @@ fun SettingsScreen(
                             name = "Walkman Portable",
                             description = "Compact Sony vibes, portable design, nostalgic",
                             colors = listOf(Color(0xFF4169E1), Color(0xFFFFD700), Color(0xFF000000)),
-                            isSelected = selectedTheme == AppTheme.WALKMAN_PORTABLE,
-                            onClick = { selectedTheme = AppTheme.WALKMAN_PORTABLE }
+                            isSelected = themeManager.currentTheme == AppTheme.WALKMAN_PORTABLE,
+                            onClick = { themeManager.setTheme(AppTheme.WALKMAN_PORTABLE) }
                         )
                         
                         ThemeOption(
@@ -153,8 +155,8 @@ fun SettingsScreen(
                             name = "Car Mode",
                             description = "Large buttons, high contrast, driving optimized",
                             colors = listOf(Color(0xFFFF0000), Color(0xFFFFFFFF), Color(0xFF000000)),
-                            isSelected = selectedTheme == AppTheme.CAR_MODE,
-                            onClick = { selectedTheme = AppTheme.CAR_MODE }
+                            isSelected = themeManager.currentTheme == AppTheme.CAR_MODE,
+                            onClick = { themeManager.setTheme(AppTheme.CAR_MODE) }
                         )
                         
                         ThemeOption(
@@ -162,8 +164,8 @@ fun SettingsScreen(
                             name = "Audiophile Pro",
                             description = "Clean minimal, waveform focused, professional",
                             colors = listOf(Color(0xFFFFFFFF), Color(0xFF333333), Color(0xFF00FFFF)),
-                            isSelected = selectedTheme == AppTheme.AUDIOPHILE_PRO,
-                            onClick = { selectedTheme = AppTheme.AUDIOPHILE_PRO }
+                            isSelected = themeManager.currentTheme == AppTheme.AUDIOPHILE_PRO,
+                            onClick = { themeManager.setTheme(AppTheme.AUDIOPHILE_PRO) }
                         )
                         
                         ThemeOption(
@@ -171,8 +173,8 @@ fun SettingsScreen(
                             name = "Custom Modular",
                             description = "Build your own - Mix & match components!",
                             colors = listOf(Color(0xFFFF00FF), Color(0xFF00FFFF), Color(0xFFFFFF00)),
-                            isSelected = selectedTheme == AppTheme.CUSTOM_MODULAR,
-                            onClick = { selectedTheme = AppTheme.CUSTOM_MODULAR }
+                            isSelected = themeManager.currentTheme == AppTheme.CUSTOM_MODULAR,
+                            onClick = { themeManager.setTheme(AppTheme.CUSTOM_MODULAR) }
                         )
                     }
                 }
