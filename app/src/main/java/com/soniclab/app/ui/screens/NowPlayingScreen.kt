@@ -3,8 +3,10 @@ package com.soniclab.app.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -41,6 +43,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
     val effects = sonicEffects
     var isPlaying by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0.35f) }
+    val scrollState = rememberScrollState()
     
     Box(
         modifier = modifier
@@ -50,7 +53,9 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .verticalScroll(scrollState)
+                .padding(24.dp)
+                .padding(bottom = 80.dp), // Extra padding for bottom nav
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -58,7 +63,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
             // Album art
             Box(
                 modifier = Modifier
-                    .size(AdaptiveSizing.albumArtSize())
+                    .size(280.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(
                         brush = Brush.radialGradient(
@@ -203,7 +208,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {}, modifier = Modifier.size(AdaptiveSizing.touchTarget())) {
+                IconButton(onClick = {}, modifier = Modifier.size(48.dp)) {
                     Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
                 }
                 
@@ -231,7 +236,7 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                     )
                 }
                 
-                IconButton(onClick = {}, modifier = Modifier.size(AdaptiveSizing.touchTarget())) {
+                IconButton(onClick = {}, modifier = Modifier.size(48.dp)) {
                     Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(32.dp), tint = colors.textPrimary)
                 }
             }
@@ -248,6 +253,8 @@ private fun CompactNowPlaying(config: ScreenConfig, modifier: Modifier = Modifie
                 IconButton(onClick = {}) { Icon(Icons.Default.FavoriteBorder, "Favorite", tint = colors.textSecondary) }
                 IconButton(onClick = {}) { Icon(Icons.Default.MoreVert, "More", tint = colors.textSecondary) }
             }
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
