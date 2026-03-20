@@ -31,6 +31,9 @@ import com.soniclab.app.ui.theme.*
 fun NowPlayingScreen(
     modifier: Modifier = Modifier
 ) {
+    val themeManager = LocalThemeManager.current
+    val colors = themeManager.colors
+    
     // Playback state
     var isPlaying by remember { mutableStateOf(true) }
     var isShuffle by remember { mutableStateOf(false) }
@@ -60,8 +63,10 @@ fun NowPlayingScreen(
         modifier = modifier.fillMaxSize()
     ) {
         // Main Now Playing Content
-        CosmicVoidPanel(
-            modifier = Modifier.fillMaxSize()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
         ) {
             Column(
                 modifier = Modifier
@@ -81,9 +86,9 @@ fun NowPlayingScreen(
                         .background(
                             brush = Brush.radialGradient(
                                 listOf(
-                                    PlasmaViolet,
-                                    PlasmaMagenta,
-                                    PlasmaBlue
+                                    colors.primary,
+                                    colors.secondary,
+                                    colors.accent
                                 )
                             )
                         )
@@ -95,7 +100,7 @@ fun NowPlayingScreen(
                         imageVector = Icons.Default.Album,
                         contentDescription = "Album Art",
                         modifier = Modifier.size(120.dp),
-                        tint = NeonCyan.copy(alpha = 0.5f)
+                        tint = colors.textPrimary.copy(alpha = 0.5f)
                     )
                 }
                 
@@ -106,7 +111,7 @@ fun NowPlayingScreen(
                 // ============================================
                 Text(
                     text = "COSMIC FREQUENCY",
-                    color = TextPrimary,
+                    color = colors.textPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
@@ -119,7 +124,7 @@ fun NowPlayingScreen(
                 
                 Text(
                     text = "SONIC LAB · DIGITAL DREAMS",
-                    color = TextSecondary,
+                    color = colors.textSecondary,
                     fontSize = 14.sp,
                     letterSpacing = 1.sp,
                     maxLines = 1,
@@ -138,8 +143,8 @@ fun NowPlayingScreen(
                             .fillMaxWidth()
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp)),
-                        color = NeonCyan,
-                        trackColor = GridCyan.copy(alpha = 0.2f)
+                        color = colors.primary,
+                        trackColor = colors.border.copy(alpha = 0.2f)
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
@@ -150,13 +155,13 @@ fun NowPlayingScreen(
                     ) {
                         Text(
                             text = "1:28",
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "3:42",
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -182,7 +187,7 @@ fun NowPlayingScreen(
                             imageVector = Icons.Default.SkipPrevious,
                             contentDescription = "Previous",
                             modifier = Modifier.size(40.dp),
-                            tint = TextPrimary
+                            tint = colors.textPrimary
                         )
                     }
                     
@@ -193,8 +198,8 @@ fun NowPlayingScreen(
                             .background(
                                 brush = Brush.radialGradient(
                                     listOf(
-                                        if (isPlaying) NeonCyan else PlasmaViolet,
-                                        if (isPlaying) NeonCyan.copy(alpha = 0.3f) else PlasmaViolet.copy(alpha = 0.3f),
+                                        if (isPlaying) colors.primary else colors.secondary,
+                                        if (isPlaying) colors.primary.copy(alpha = 0.3f) else colors.secondary.copy(alpha = 0.3f),
                                         androidx.compose.ui.graphics.Color.Transparent
                                     )
                                 ),
@@ -207,7 +212,7 @@ fun NowPlayingScreen(
                             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (isPlaying) "Pause" else "Play",
                             modifier = Modifier.size(48.dp),
-                            tint = TextPrimary
+                            tint = colors.textPrimary
                         )
                     }
                     
@@ -220,7 +225,7 @@ fun NowPlayingScreen(
                             imageVector = Icons.Default.SkipNext,
                             contentDescription = "Next",
                             modifier = Modifier.size(40.dp),
-                            tint = TextPrimary
+                            tint = colors.textPrimary
                         )
                     }
                 }
@@ -239,7 +244,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = Icons.Default.Shuffle,
                             contentDescription = "Shuffle",
-                            tint = if (isShuffle) NeonCyan else Gray300
+                            tint = if (isShuffle) colors.primary else colors.textSecondary
                         )
                     }
                     
@@ -252,7 +257,7 @@ fun NowPlayingScreen(
                                 else -> Icons.Default.Repeat
                             },
                             contentDescription = "Repeat",
-                            tint = if (repeatMode > 0) NeonCyan else Gray300
+                            tint = if (repeatMode > 0) colors.primary else colors.textSecondary
                         )
                     }
                     
@@ -261,7 +266,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = if (isFavorite) NeonPink else Gray300
+                            tint = if (isFavorite) colors.accent else colors.textSecondary
                         )
                     }
                     
@@ -270,7 +275,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Audio Controls",
-                            tint = if (isPanelOpen) NeonCyan else TextPrimary
+                            tint = if (isPanelOpen) colors.primary else colors.textPrimary
                         )
                     }
                 }
@@ -281,7 +286,7 @@ fun NowPlayingScreen(
                 if (!isPanelOpen) {
                     Text(
                         text = "⬆ Swipe up for audio controls",
-                        color = TextSecondary.copy(alpha = 0.5f),
+                        color = colors.textSecondary.copy(alpha = 0.5f),
                         fontSize = 11.sp,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -308,20 +313,21 @@ fun NowPlayingScreen(
                     }
                 }
         ) {
-            DigitalGridPanel(
-                modifier = Modifier.fillMaxSize()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colors.surface)
+                    .padding(16.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     // Panel handle
                     Box(
                         modifier = Modifier
                             .width(40.dp)
                             .height(4.dp)
-                            .background(GridCyan, RoundedCornerShape(2.dp))
+                            .background(colors.border, RoundedCornerShape(2.dp))
                             .align(Alignment.CenterHorizontally)
                     )
                     
@@ -329,7 +335,7 @@ fun NowPlayingScreen(
                     
                     Text(
                         text = "⚡ AUDIO CONTROLS ⚡",
-                        color = NeonCyan,
+                        color = colors.primary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
@@ -391,7 +397,7 @@ fun NowPlayingScreen(
                             .height(48.dp)
                             .background(
                                 brush = Brush.horizontalGradient(
-                                    listOf(PlasmaViolet, PlasmaCyan)
+                                    listOf(colors.primary, colors.secondary)
                                 ),
                                 shape = RoundedCornerShape(8.dp)
                             )
@@ -400,7 +406,7 @@ fun NowPlayingScreen(
                     ) {
                         Text(
                             text = "◢ CLOSE ◣",
-                            color = TextPrimary,
+                            color = colors.textPrimary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
