@@ -10,15 +10,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.soniclab.app.ui.screens.CollectionScreen
+import com.soniclab.app.ui.screens.LabScreen
 import com.soniclab.app.ui.screens.NowPlayingScreen
-import com.soniclab.app.ui.screens.PlaceholderScreen
+import com.soniclab.app.ui.screens.VisualsScreen
 import com.soniclab.app.ui.theme.SonicLabTheme
 import com.soniclab.app.ui.theme.sonicColors
 import com.soniclab.app.util.PermissionHandler
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Activity with Bottom Navigation and Permission Handling
+ * Main Activity - FULLY WIRED with ALL working screens
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -28,12 +30,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize permission handler
         permissionHandler = PermissionHandler(this) { granted ->
-            // Permissions result handled in Compose
+            // Permissions result - UI will react via ViewModel
         }
         
-        // Check and request permissions
         if (!permissionHandler.hasPermissions(this)) {
             permissionHandler.requestPermissions()
         }
@@ -46,9 +46,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/**
- * Navigation destinations
- */
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object NowPlaying : Screen("now_playing", "Now Playing", Icons.Default.PlayArrow)
     object Collection : Screen("collection", "Collection", Icons.Default.LibraryMusic)
@@ -56,9 +53,6 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Lab : Screen("lab", "Lab", Icons.Default.Settings)
 }
 
-/**
- * Main screen with bottom navigation
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -111,9 +105,9 @@ fun MainScreen() {
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedScreen) {
                 Screen.NowPlaying -> NowPlayingScreen()
-                Screen.Collection -> PlaceholderScreen("Collection", "Your music library will appear here")
-                Screen.Visuals -> PlaceholderScreen("Visuals", "Audio visualizations coming soon")
-                Screen.Lab -> PlaceholderScreen("Lab", "EQ and audio controls coming soon")
+                Screen.Collection -> CollectionScreen()
+                Screen.Visuals -> VisualsScreen()
+                Screen.Lab -> LabScreen()
             }
         }
     }
