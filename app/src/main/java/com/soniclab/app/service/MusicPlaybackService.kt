@@ -17,15 +17,6 @@ import com.soniclab.app.R
 
 /**
  * Foreground service for background music playback
- * 
- * This service ensures:
- * - Music continues when app is in background
- * - Music continues when phone is locked
- * - Lock screen controls are available
- * - Notification controls work properly
- * - System won't kill the player
- * 
- * Based on Media3 MediaSessionService for modern Android
  */
 class MusicPlaybackService : MediaSessionService() {
     
@@ -34,7 +25,6 @@ class MusicPlaybackService : MediaSessionService() {
         private const val CHANNEL_ID = "soniclab_playback"
         private const val CHANNEL_NAME = "Music Playback"
         
-        // Actions for notification buttons
         const val ACTION_PLAY = "com.soniclab.app.PLAY"
         const val ACTION_PAUSE = "com.soniclab.app.PAUSE"
         const val ACTION_NEXT = "com.soniclab.app.NEXT"
@@ -47,29 +37,15 @@ class MusicPlaybackService : MediaSessionService() {
     
     override fun onCreate() {
         super.onCreate()
-        
-        // Create notification channel (required for Android O+)
         createNotificationChannel()
-        
-        // Initialize player (will be provided by PlayerManager)
-        // player = getPlayer()
-        
-        // Create MediaSession for lock screen controls
-        // mediaSession = createMediaSession()
-        
-        // Start as foreground service
-        // startForeground(NOTIFICATION_ID, createNotification())
     }
     
-    /**
-     * Create notification channel for Android O+
-     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_LOW // Low = no sound/vibration
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Controls for music playback"
                 setShowBadge(false)
@@ -81,16 +57,11 @@ class MusicPlaybackService : MediaSessionService() {
         }
     }
     
-    /**
-     * Create notification with playback controls
-     * Shows on lock screen and notification shade
-     */
     private fun createNotification(
         title: String = "SonicLab",
         artist: String = "No track playing",
         isPlaying: Boolean = false
     ): Notification {
-        // Intent to open app when notification is tapped
         val contentIntent = PendingIntent.getActivity(
             this,
             0,
@@ -98,28 +69,24 @@ class MusicPlaybackService : MediaSessionService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         
-        // Play/Pause action
         val playPauseAction = NotificationCompat.Action(
             if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
             if (isPlaying) "Pause" else "Play",
             createPendingIntent(if (isPlaying) ACTION_PAUSE else ACTION_PLAY)
         )
         
-        // Previous action
         val previousAction = NotificationCompat.Action(
             R.drawable.ic_skip_previous,
             "Previous",
             createPendingIntent(ACTION_PREVIOUS)
         )
         
-        // Next action
         val nextAction = NotificationCompat.Action(
             R.drawable.ic_skip_next,
             "Next",
             createPendingIntent(ACTION_NEXT)
         )
         
-        // Stop action
         val stopAction = NotificationCompat.Action(
             R.drawable.ic_close,
             "Stop",
@@ -130,28 +97,18 @@ class MusicPlaybackService : MediaSessionService() {
             .setContentTitle(title)
             .setContentText(artist)
             .setSmallIcon(R.drawable.ic_notification)
-            // .setLargeIcon(albumArt) // TODO: Add album art
             .setContentIntent(contentIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(isPlaying) // Can't swipe away when playing
+            .setOngoing(isPlaying)
             .setShowWhen(false)
             .addAction(previousAction)
             .addAction(playPauseAction)
             .addAction(nextAction)
             .addAction(stopAction)
-            // Media style for better lock screen appearance
-            .setStyle(
-                androidx.media.app.NotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView(0, 1, 2) // Prev, Play, Next
-                    // .setMediaSession(mediaSession?.sessionToken)
-            )
             .build()
     }
     
-    /**
-     * Create PendingIntent for notification actions
-     */
     private fun createPendingIntent(action: String): PendingIntent {
         val intent = Intent(action).apply {
             setPackage(packageName)
@@ -164,23 +121,12 @@ class MusicPlaybackService : MediaSessionService() {
         )
     }
     
-    /**
-     * Update notification when playback state changes
-     */
-    fun updateNotification(
-        title: String,
-        artist: String,
-        isPlaying: Boolean
-    ) {
+    fun updateNotification(title: String, artist: String, isPlaying: Boolean) {
         val notification = createNotification(title, artist, isPlaying)
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
     
-    /**
-     * Required for MediaSessionService
-     * Returns the MediaSession for this service
-     */
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
@@ -194,32 +140,18 @@ class MusicPlaybackService : MediaSessionService() {
         super.onDestroy()
     }
     
-    /**
-     * Handle incoming service commands
-     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_PLAY -> {
-                // TODO: player.play()
-                updateNotification("Title", "Artist", true)
-            }
-            ACTION_PAUSE -> {
-                // TODO: player.pause()
-                updateNotification("Title", "Artist", false)
-            }
-            ACTION_NEXT -> {
-                // TODO: player.seekToNext()
-            }
-            ACTION_PREVIOUS -> {
-                // TODO: player.seekToPrevious()
-            }
+            ACTION_PLAY -> updateNotification("Title", "Artist", true)
+            ACTION_PAUSE -> updateNotification("Title", "Artist", false)
+            ACTION_NEXT -> { /* TODO */ }
+            ACTION_PREVIOUS -> { /* TODO */ }
             ACTION_STOP -> {
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
-        
-        return START_STICKY // Restart service if killed
+        return START_STICKY
     }
     
     override fun onBind(intent: Intent?): IBinder? {
@@ -227,11 +159,7 @@ class MusicPlaybackService : MediaSessionService() {
     }
 }
 
-/**
- * Helper to start/stop the music service
- */
 object PlaybackServiceHelper {
-    
     fun startService(context: Context) {
         val intent = Intent(context, MusicPlaybackService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
