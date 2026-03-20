@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -14,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "0.1.0-alpha"
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -46,7 +46,7 @@ android {
     }
     
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.4"  // Updated for Kotlin 1.9.20
     }
     
     packaging {
@@ -70,34 +70,24 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     
-    // Compose Navigation
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.5")
     
-    // Hilt Dependency Injection
+    // Hilt
     implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
-    // Media3 - Audio Playback
+    // Media3
     implementation("androidx.media3:media3-exoplayer:1.2.0")
-    implementation("androidx.media3:media3-session:1.2.0")
     implementation("androidx.media3:media3-ui:1.2.0")
-    implementation("androidx.media3:media3-common:1.2.0")
-    
-    // Room Database
-    implementation("androidx.room:room-runtime:2.6.0")
-    implementation("androidx.room:room-ktx:2.6.0")
-    kapt("androidx.room:room-compiler:2.6.0")
+    implementation("androidx.media3:media3-session:1.2.0")
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     
-    // Image Loading
+    // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
-    
-    // DataStore (for preferences)
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -109,7 +99,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
-// Allow references to generated code
 kapt {
     correctErrorTypes = true
 }
