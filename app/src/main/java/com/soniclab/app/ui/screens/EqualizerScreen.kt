@@ -493,6 +493,7 @@ private fun EQSlider(
             )
         }
     }
-}
+        }
     }
+}
 }
