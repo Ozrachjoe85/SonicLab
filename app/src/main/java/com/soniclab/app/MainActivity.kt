@@ -14,15 +14,30 @@ import com.soniclab.app.ui.screens.NowPlayingScreen
 import com.soniclab.app.ui.screens.PlaceholderScreen
 import com.soniclab.app.ui.theme.SonicLabTheme
 import com.soniclab.app.ui.theme.sonicColors
+import com.soniclab.app.util.PermissionHandler
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Activity with Bottom Navigation
+ * Main Activity with Bottom Navigation and Permission Handling
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    private lateinit var permissionHandler: PermissionHandler
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize permission handler
+        permissionHandler = PermissionHandler(this) { granted ->
+            // Permissions result handled in Compose
+        }
+        
+        // Check and request permissions
+        if (!permissionHandler.hasPermissions(this)) {
+            permissionHandler.requestPermissions()
+        }
+        
         setContent {
             SonicLabTheme {
                 MainScreen()
@@ -93,7 +108,6 @@ fun MainScreen() {
             }
         }
     ) { paddingValues ->
-        // Content with proper padding to avoid bottom nav overlap
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedScreen) {
                 Screen.NowPlaying -> NowPlayingScreen()
