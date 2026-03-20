@@ -74,7 +74,7 @@ fun VisualsScreen(modifier: Modifier = Modifier) {
             "vu",
             "VU Classic",
             "Giant analog needles",
-            Icons.Default.SpeedOutlined
+            Icons.Default.Speed
         ),
         VisualizerType(
             "waveform",
