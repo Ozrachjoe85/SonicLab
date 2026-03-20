@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.media.session.MediaSessionCompat
 import android.util.Base64
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.Player
@@ -72,13 +71,17 @@ class MusicPlaybackService : MediaSessionService() {
             addAction(ACTION_PREVIOUS)
             addAction(ACTION_STOP)
         }
-        registerReceiver(actionReceiver, filter, RECEIVER_EXPORTED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(actionReceiver, filter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(actionReceiver, filter)
+        }
         
         // Initialize MediaSession
         val player = playerManager.getPlayer()
         mediaSession = MediaSession.Builder(this, player).build()
         
-        // Start foreground with initial notification
+        // Start foreground
         startForeground(NOTIFICATION_ID, createNotification())
     }
     
@@ -116,12 +119,14 @@ class MusicPlaybackService : MediaSessionService() {
         // Album art
         val albumArt = track?.albumArtUri?.let { uri ->
             if (uri.startsWith("data:image")) {
-                // Base64 embedded art
-                val base64 = uri.substringAfter("base64,")
-                val bytes = Base64.decode(base64, Base64.DEFAULT)
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                try {
+                    val base64 = uri.substringAfter("base64,")
+                    val bytes = Base64.decode(base64, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                } catch (e: Exception) {
+                    null
+                }
             } else {
-                // MediaStore URI
                 try {
                     contentResolver.openInputStream(android.net.Uri.parse(uri))?.use {
                         BitmapFactory.decodeStream(it)
@@ -149,9 +154,6 @@ class MusicPlaybackService : MediaSessionService() {
                 else createAction(R.drawable.ic_play, "Play", ACTION_PLAY)
             )
             .addAction(createAction(R.drawable.ic_skip_next, "Next", ACTION_NEXT))
-            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(0, 1, 2)
-                .setMediaSession(MediaSessionCompat.Token.fromToken(mediaSession?.sessionCompatToken)))
             .build()
     }
     
