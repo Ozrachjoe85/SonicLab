@@ -6,29 +6,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = NixieTubeOrange,
-    onPrimary = WalnutDark,
-    primaryContainer = WalnutMid,
-    onPrimaryContainer = TubeGlowWarm,
+private val CosmicDarkScheme = darkColorScheme(
+    primary = NeonCyan,
+    onPrimary = CosmicVoid,
+    primaryContainer = CosmicPurple,
+    onPrimaryContainer = NeonPink,
     
-    secondary = LEDBlue,
-    onSecondary = WalnutDark,
-    secondaryContainer = BrushedAluminum,
-    onSecondaryContainer = LEDBlue,
+    secondary = PlasmaViolet,
+    onSecondary = CosmicVoid,
+    secondaryContainer = CosmicBlue,
+    onSecondaryContainer = NeonCyan,
     
-    background = WalnutDark,
-    onBackground = LabelWhite,
-    surface = WalnutMid,
-    onSurface = LabelWhite,
-    surfaceVariant = BrushedAluminum,
-    onSurfaceVariant = WalnutDark,
+    background = BgDeepSpace,
+    onBackground = TextPrimary,
+    surface = BgNebula,
+    onSurface = TextPrimary,
+    surfaceVariant = BgPanel,
+    onSurfaceVariant = TextSecondary,
     
-    outline = BrushedAluminumLight,
-    outlineVariant = ChromeShadow,
+    outline = GridCyan,
+    outlineVariant = GridPurple,
     
-    error = LEDRed,
-    onError = LabelWhite
+    error = GlitchRed,
+    onError = TextPrimary
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -45,23 +45,15 @@ private val LightColorScheme = lightColorScheme(
     background = Color.White,
     onBackground = Color.Black,
     surface = Color.White,
-    onSurface = Color.Black,
-    surfaceVariant = PurpleGrey80,
-    onSurfaceVariant = PurpleGrey40,
-    
-    outline = PurpleGrey40,
-    outlineVariant = PurpleGrey80,
-    
-    error = Color.Red,
-    onError = Color.White
+    onSurface = Color.Black
 )
 
 @Composable
 fun SonicLabTheme(
-    darkTheme: Boolean = true, // Always use dark theme for retro aesthetic
+    darkTheme: Boolean = true, // Always cosmic dark
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = if (darkTheme) CosmicDarkScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
