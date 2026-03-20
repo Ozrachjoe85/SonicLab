@@ -40,6 +40,9 @@ data class Song(
 fun LibraryScreen(
     modifier: Modifier = Modifier
 ) {
+    val themeManager = LocalThemeManager.current
+    val colors = themeManager.colors
+    
     var selectedTab by remember { mutableStateOf(LibraryTab.SONGS) }
     var searchQuery by remember { mutableStateOf("") }
     
@@ -72,6 +75,11 @@ fun LibraryScreen(
     CosmicVoidPanel(
         modifier = modifier.fillMaxSize()
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
