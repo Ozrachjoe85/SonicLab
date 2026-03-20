@@ -45,6 +45,9 @@ enum class VisualizerStyle {
 fun VisualizerScreen(
     modifier: Modifier = Modifier
 ) {
+    val themeManager = LocalThemeManager.current
+    val colors = themeManager.colors
+    
     var currentStyle by remember { mutableStateOf(VisualizerStyle.FREQUENCY_BARS) }
     var isPlaying by remember { mutableStateOf(true) }
     
@@ -56,6 +59,11 @@ fun VisualizerScreen(
     CosmicVoidPanel(
         modifier = modifier.fillMaxSize()
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+        ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
