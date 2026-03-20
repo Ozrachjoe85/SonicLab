@@ -48,35 +48,30 @@ fun EqualizerScreen(
     val presets = remember {
         mapOf(
             "FLAT" to EQPreset("FLAT", List(32) { 0.5f }),
-            "ROCK" to EQPreset("ROCK", List(32) { i ->
-                when {
-                    i < 4 -> 0.7f  // Bass boost
-                    i < 8 -> 0.6f
-                    i < 24 -> 0.5f // Mids neutral
-                    else -> 0.65f  // Highs boost
-                }
-            }),
-            "JAZZ" to EQPreset("JAZZ", List(32) { i ->
-                when {
-                    i < 6 -> 0.45f  // Bass cut
-                    i < 16 -> 0.55f // Mids boost
-                    else -> 0.6f    // Highs boost
-                }
-            }),
-            "VOCAL" to EQPreset("VOCAL", List(32) { i ->
-                when {
-                    i < 8 -> 0.4f   // Bass cut
-                    i < 20 -> 0.65f // Mids boost (vocals)
-                    else -> 0.5f    // Highs neutral
-                }
-            }),
-            "BASS" to EQPreset("BASS", List(32) { i ->
-                when {
-                    i < 10 -> 0.8f  // Heavy bass boost
-                    i < 16 -> 0.55f
-                    else -> 0.5f
-                }
-            })
+            "ROCK" to EQPreset("ROCK", 
+                listOf(0.7f, 0.7f, 0.7f, 0.7f, 0.6f, 0.6f, 0.6f, 0.6f,
+                       0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f,
+                       0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f,
+                       0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f)
+            ),
+            "JAZZ" to EQPreset("JAZZ",
+                listOf(0.45f, 0.45f, 0.45f, 0.45f, 0.45f, 0.45f, 0.55f, 0.55f,
+                       0.55f, 0.55f, 0.55f, 0.55f, 0.55f, 0.55f, 0.55f, 0.55f,
+                       0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f,
+                       0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f)
+            ),
+            "VOCAL" to EQPreset("VOCAL",
+                listOf(0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f,
+                       0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f, 0.65f,
+                       0.65f, 0.65f, 0.65f, 0.65f, 0.5f, 0.5f, 0.5f, 0.5f,
+                       0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f)
+            ),
+            "BASS" to EQPreset("BASS",
+                listOf(0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f,
+                       0.8f, 0.8f, 0.55f, 0.55f, 0.55f, 0.55f, 0.55f, 0.55f,
+                       0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f,
+                       0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f)
+            )
         )
     }
     
