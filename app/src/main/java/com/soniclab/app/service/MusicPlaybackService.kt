@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import androidx.media.app.NotificationCompat as MediaNotificationCompat
 import androidx.media3.common.Player
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -107,10 +106,6 @@ class MusicPlaybackService : MediaSessionService() {
             .addAction(playPauseAction)
             .addAction(nextAction)
             .addAction(stopAction)
-            .setStyle(
-                MediaNotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView(0, 1, 2)
-            )
             .build()
     }
     
