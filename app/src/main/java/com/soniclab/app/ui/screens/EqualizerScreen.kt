@@ -494,3 +494,6 @@ private fun EQSlider(
         }
     }
 }
+        }
+    }
+}
