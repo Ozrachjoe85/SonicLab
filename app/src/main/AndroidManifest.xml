@@ -2,30 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ============================================ -->
-    <!-- PERMISSIONS -->
-    <!-- ============================================ -->
-    
-    <!-- Internet for streaming (if added later) -->
+    <!-- Permissions for audio playback and storage access -->
     <uses-permission android:name="android.permission.INTERNET" />
-    
-    <!-- Read external storage for music files -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    
-    <!-- Read media audio (Android 13+) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    
-    <!-- Wake lock to keep playing during sleep -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     
-    <!-- Foreground service (required for background playback) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Storage permissions for reading music files -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     
-    <!-- Media playback foreground service (Android 14+) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    
-    <!-- Post notifications (Android 13+) -->
+    <!-- Post notifications for playback controls (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -40,62 +28,29 @@
         android:theme="@style/Theme.SonicLab"
         tools:targetApi="31">
         
-        <!-- ============================================ -->
-        <!-- MAIN ACTIVITY -->
-        <!-- ============================================ -->
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.SonicLab"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:launchMode="singleTop">
+            android:theme="@style/Theme.SonicLab">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
-            <!-- Handle audio files -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" />
-                <data android:scheme="file" />
-                <data android:mimeType="audio/*" />
-            </intent-filter>
         </activity>
         
-        <!-- ============================================ -->
-        <!-- BACKGROUND PLAYBACK SERVICE -->
-        <!-- ============================================ -->
+        <!-- Music Playback Service -->
         <service
             android:name=".service.MusicPlaybackService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">
-            
-            <!-- Media3 MediaSessionService -->
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
         
-        <!-- ============================================ -->
-        <!-- MEDIA BUTTON RECEIVER -->
-        <!-- Handles headphone buttons, car controls -->
-        <!-- ============================================ -->
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-        
-        <!-- ============================================ -->
-        <!-- FILE PROVIDER (for sharing files) -->
-        <!-- ============================================ -->
+        <!-- FileProvider for sharing files -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -105,7 +60,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        
     </application>
 
 </manifest>
