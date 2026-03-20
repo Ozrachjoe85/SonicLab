@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.soniclab.app.ui.components.*
 import com.soniclab.app.ui.theme.*
 import kotlin.math.*
+import kotlin.random.Random
 
 enum class VisualizerStyle {
     FREQUENCY_BARS,
@@ -132,7 +133,7 @@ fun VisualizerScreen(
                             onClick = { currentStyle = VisualizerStyle.OSCILLOSCOPE }
                         )
                         StyleButton(
-                            icon = Icons.Default.ThreeDRotation,
+                            icon = Icons.Default.Autorenew,
                             label = "3D",
                             isSelected = currentStyle == VisualizerStyle.SPATIAL_3D,
                             onClick = { currentStyle = VisualizerStyle.SPATIAL_3D }
