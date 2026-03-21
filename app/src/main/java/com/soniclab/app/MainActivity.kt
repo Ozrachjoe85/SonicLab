@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         permissionHandler = PermissionHandler(this) { granted ->
-            // Permission result handled by ViewModel
+            // Permission handled by ViewModel
         }
         
         if (!permissionHandler.hasPermissions(this)) {
@@ -43,8 +43,8 @@ class MainActivity : ComponentActivity() {
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object NowPlaying : Screen("now_playing", "Playing", Icons.Default.PlayArrow)
     object Collection : Screen("collection", "Library", Icons.Default.LibraryMusic)
+    object Equalizer : Screen("equalizer", "EQ", Icons.Default.Tune)
     object Visuals : Screen("visuals", "Visuals", Icons.Default.GraphicEq)
-    object Lab : Screen("lab", "Lab", Icons.Default.Tune)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
 
@@ -57,8 +57,8 @@ fun MainScreen() {
     val screens = listOf(
         Screen.NowPlaying,
         Screen.Collection,
+        Screen.Equalizer,
         Screen.Visuals,
-        Screen.Lab,
         Screen.Settings
     )
     
@@ -101,9 +101,11 @@ fun MainScreen() {
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedScreen) {
                 Screen.NowPlaying -> NowPlayingScreen()
-                Screen.Collection -> CollectionScreen()
+                Screen.Collection -> CollectionScreen(
+                    onNavigateToNowPlaying = { selectedScreen = Screen.NowPlaying }
+                )
+                Screen.Equalizer -> EqualizerScreen()
                 Screen.Visuals -> VisualsScreen()
-                Screen.Lab -> LabScreen()
                 Screen.Settings -> SettingsScreen()
             }
         }
