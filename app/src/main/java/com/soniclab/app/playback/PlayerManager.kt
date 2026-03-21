@@ -1,7 +1,6 @@
 package com.soniclab.app.playback
 
 import android.content.Context
-import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -12,33 +11,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class Track(
-    val id: Long,
-    val uri: String,
-    val title: String,
-    val artist: String,
-    val album: String,
-    val duration: Long,
-    val albumArtUri: String?
-)
-
-enum class RepeatMode {
-    OFF,      // No repeat
-    ONE,      // Repeat current track
-    ALL       // Repeat entire queue
-}
-
+/**
+ * PlayerManager - Central controller for all audio playback
+ * 
+ * Manages:
+ * - ExoPlayer instance
+ * - Playback state (playing/paused/stopped)
+ * - Current track info
+ * - Queue management
+ * - Progress tracking
+ */
 @Singleton
 class PlayerManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    
+    // ExoPlayer instance
     private var player: ExoPlayer? = null
     
+    // Playback state
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
-    
-    private val _currentTrack = MutableStateFlow<Track?>(null)
-    val currentTrack: StateFlow<Track?> = _currentTrack.asStateFlow()
     
     private val _currentPosition = MutableStateFlow(0L)
     val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
@@ -46,168 +39,166 @@ class PlayerManager @Inject constructor(
     private val _duration = MutableStateFlow(0L)
     val duration: StateFlow<Long> = _duration.asStateFlow()
     
+    private val _currentTrack = MutableStateFlow<Track?>(null)
+    val currentTrack: StateFlow<Track?> = _currentTrack.asStateFlow()
+    
+    // Queue
     private val _queue = MutableStateFlow<List<Track>>(emptyList())
     val queue: StateFlow<List<Track>> = _queue.asStateFlow()
     
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
     
-    private val _shuffleEnabled = MutableStateFlow(false)
-    val shuffleEnabled: StateFlow<Boolean> = _shuffleEnabled.asStateFlow()
-    
-    private val _repeatMode = MutableStateFlow(RepeatMode.OFF)
-    val repeatMode: StateFlow<RepeatMode> = _repeatMode.asStateFlow()
-    
-    private var originalQueue: List<Track> = emptyList()
-    private var shuffledIndices: List<Int> = emptyList()
-    
+    /**
+     * Initialize the player
+     */
     fun initialize() {
         if (player == null) {
-            player = ExoPlayer.Builder(context).build().apply {
-                addListener(object : Player.Listener {
-                    override fun onIsPlayingChanged(playing: Boolean) {
-                        _isPlaying.value = playing
-                    }
-                    
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_ENDED) {
-                            handleTrackEnded()
+            player = ExoPlayer.Builder(context)
+                .build()
+                .apply {
+                    // Listen for playback state changes
+                    addListener(object : Player.Listener {
+                        override fun onIsPlayingChanged(isPlaying: Boolean) {
+                            _isPlaying.value = isPlaying
                         }
-                    }
-                })
-            }
+                        
+                        override fun onPlaybackStateChanged(playbackState: Int) {
+                            when (playbackState) {
+                                Player.STATE_READY -> {
+                                    _duration.value = duration
+                                }
+                                Player.STATE_ENDED -> {
+                                    // Auto-play next track
+                                    playNext()
+                                }
+                            }
+                        }
+                    })
+                }
         }
     }
     
+    /**
+     * Set the queue and start playing
+     */
     fun setQueueAndPlay(tracks: List<Track>, startIndex: Int = 0) {
-        originalQueue = tracks
+        if (tracks.isEmpty()) return
+        
         _queue.value = tracks
         _currentIndex.value = startIndex
+        _currentTrack.value = tracks[startIndex]
         
-        if (_shuffleEnabled.value) {
-            applyShuffleToQueue()
+        // Convert tracks to MediaItems
+        val mediaItems = tracks.map { track ->
+            MediaItem.fromUri(track.uri)
         }
         
-        prepareQueue()
-        player?.seekToDefaultPosition(startIndex)
-        _currentTrack.value = tracks.getOrNull(startIndex)
-    }
-    
-    private fun prepareQueue() {
-        val mediaItems = _queue.value.map { track ->
-            MediaItem.fromUri(Uri.parse(track.uri))
-        }
-        player?.setMediaItems(mediaItems)
-        player?.prepare()
-    }
-    
-    private fun handleTrackEnded() {
-        when (_repeatMode.value) {
-            RepeatMode.ONE -> {
-                player?.seekTo(0)
-                player?.play()
-            }
-            RepeatMode.ALL -> {
-                playNext()
-            }
-            RepeatMode.OFF -> {
-                val nextIndex = _currentIndex.value + 1
-                if (nextIndex < _queue.value.size) {
-                    playNext()
-                } else {
-                    pause()
-                }
-            }
+        player?.apply {
+            setMediaItems(mediaItems, startIndex, 0)
+            prepare()
+            play()
         }
     }
     
-    fun togglePlayPause() {
-        if (_isPlaying.value) pause() else play()
-    }
-    
+    /**
+     * Play/Resume
+     */
     fun play() {
         player?.play()
     }
     
+    /**
+     * Pause
+     */
     fun pause() {
         player?.pause()
     }
     
+    /**
+     * Toggle play/pause
+     */
+    fun togglePlayPause() {
+        if (_isPlaying.value) {
+            pause()
+        } else {
+            play()
+        }
+    }
+    
+    /**
+     * Play next track in queue
+     */
     fun playNext() {
-        val nextIndex = (_currentIndex.value + 1) % _queue.value.size
-        _currentIndex.value = nextIndex
-        _currentTrack.value = _queue.value.getOrNull(nextIndex)
-        player?.seekToDefaultPosition(nextIndex)
-        player?.play()
+        val nextIndex = _currentIndex.value + 1
+        if (nextIndex < _queue.value.size) {
+            _currentIndex.value = nextIndex
+            _currentTrack.value = _queue.value[nextIndex]
+            player?.seekToNext()
+        }
     }
     
+    /**
+     * Play previous track in queue
+     */
     fun playPrevious() {
-        val currentPos = getCurrentPosition()
-        if (currentPos > 3000) {
-            // If more than 3 seconds in, restart current track
-            player?.seekTo(0)
-        } else {
-            // Go to previous track
-            val prevIndex = if (_currentIndex.value > 0) {
-                _currentIndex.value - 1
-            } else {
-                _queue.value.size - 1
-            }
+        val prevIndex = _currentIndex.value - 1
+        if (prevIndex >= 0) {
             _currentIndex.value = prevIndex
-            _currentTrack.value = _queue.value.getOrNull(prevIndex)
-            player?.seekToDefaultPosition(prevIndex)
-        }
-        player?.play()
-    }
-    
-    fun seekTo(position: Long) {
-        player?.seekTo(position)
-    }
-    
-    fun getCurrentPosition(): Long = player?.currentPosition ?: 0L
-    
-    fun getDuration(): Long = player?.duration?.takeIf { it > 0 } ?: 0L
-    
-    fun getPlayer(): Player = player!!
-    
-    fun toggleShuffle() {
-        _shuffleEnabled.value = !_shuffleEnabled.value
-        if (_shuffleEnabled.value) {
-            applyShuffleToQueue()
+            _currentTrack.value = _queue.value[prevIndex]
+            player?.seekToPrevious()
         } else {
-            // Restore original order
-            _queue.value = originalQueue
-            val currentTrack = _currentTrack.value
-            _currentIndex.value = originalQueue.indexOf(currentTrack)
-        }
-        prepareQueue()
-    }
-    
-    private fun applyShuffleToQueue() {
-        val currentTrack = _currentTrack.value
-        val mutableQueue = originalQueue.toMutableList()
-        
-        // Keep current track at position 0
-        currentTrack?.let {
-            mutableQueue.remove(it)
-            mutableQueue.shuffle()
-            mutableQueue.add(0, it)
-        } ?: mutableQueue.shuffle()
-        
-        _queue.value = mutableQueue
-        _currentIndex.value = 0
-    }
-    
-    fun cycleRepeatMode() {
-        _repeatMode.value = when (_repeatMode.value) {
-            RepeatMode.OFF -> RepeatMode.ALL
-            RepeatMode.ALL -> RepeatMode.ONE
-            RepeatMode.ONE -> RepeatMode.OFF
+            // If at first track, restart it
+            player?.seekTo(0)
         }
     }
     
+    /**
+     * Seek to position (in milliseconds)
+     */
+    fun seekTo(positionMs: Long) {
+        player?.seekTo(positionMs)
+    }
+    
+    /**
+     * Get current playback position
+     */
+    fun getCurrentPosition(): Long {
+        return player?.currentPosition ?: 0L
+    }
+    
+    /**
+     * Get duration of current track
+     */
+    fun getDuration(): Long {
+        return player?.duration ?: 0L
+    }
+    
+    /**
+     * Release player resources
+     */
     fun release() {
         player?.release()
         player = null
     }
+    
+    /**
+     * Get the underlying ExoPlayer instance
+     * (for service integration)
+     */
+    fun getPlayer(): Player? = player
 }
+
+/**
+ * Simple track data class
+ * Will be replaced with Room entity in later phase
+ */
+data class Track(
+    val id: Long,
+    val uri: String,
+    val title: String,
+    val artist: String,
+    val album: String,
+    val duration: Long,
+    val albumArtUri: String? = null
+)
