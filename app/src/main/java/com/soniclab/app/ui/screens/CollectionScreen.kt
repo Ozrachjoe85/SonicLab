@@ -33,9 +33,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * CollectionViewModel - Manages library data
- */
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
     private val musicScanner: MusicScanner,
@@ -51,8 +48,11 @@ class CollectionViewModel @Inject constructor(
     private val _albums = MutableStateFlow<List<String>>(emptyList())
     val albums: StateFlow<List<String>> = _albums.asStateFlow()
     
-    private val _isLoading = MutableStateFlow(true)
+    private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    
+    // Cache for quick access
+    private var cachedTracks: List<Track> = emptyList()
     
     init {
         loadLibrary()
@@ -62,49 +62,51 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                _tracks.value = musicScanner.scanMusicFiles()
-                _artists.value = musicScanner.getAllArtists()
-                _albums.value = musicScanner.getAllAlbums()
+                cachedTracks = musicScanner.scanMusicFiles()
+                _tracks.value = cachedTracks
+                
+                // Extract unique artists and albums in parallel
+                _artists.value = cachedTracks.map { it.artist }.distinct().sorted()
+                _albums.value = cachedTracks.map { it.album }.distinct().sorted()
             } finally {
                 _isLoading.value = false
             }
         }
     }
     
-    fun playTrack(track: Track) {
-        val trackList = _tracks.value
-        val index = trackList.indexOf(track)
+    fun playTrack(track: Track, onNavigateToNowPlaying: () -> Unit) {
+        val index = cachedTracks.indexOf(track)
         if (index >= 0) {
-            playerManager.setQueueAndPlay(trackList, index)
+            playerManager.setQueueAndPlay(cachedTracks, index)
+            playerManager.play()
+            onNavigateToNowPlaying()
         }
     }
     
-    fun playArtist(artist: String) {
-        viewModelScope.launch {
-            val artistTracks = musicScanner.getTracksByArtist(artist)
-            if (artistTracks.isNotEmpty()) {
-                playerManager.setQueueAndPlay(artistTracks, 0)
-            }
+    fun playArtist(artist: String, onNavigateToNowPlaying: () -> Unit) {
+        val artistTracks = cachedTracks.filter { it.artist == artist }
+        if (artistTracks.isNotEmpty()) {
+            playerManager.setQueueAndPlay(artistTracks, 0)
+            playerManager.play()
+            onNavigateToNowPlaying()
         }
     }
     
-    fun playAlbum(album: String) {
-        viewModelScope.launch {
-            val albumTracks = musicScanner.getTracksByAlbum(album)
-            if (albumTracks.isNotEmpty()) {
-                playerManager.setQueueAndPlay(albumTracks, 0)
-            }
+    fun playAlbum(album: String, onNavigateToNowPlaying: () -> Unit) {
+        val albumTracks = cachedTracks.filter { it.album == album }
+        if (albumTracks.isNotEmpty()) {
+            playerManager.setQueueAndPlay(albumTracks, 0)
+            playerManager.play()
+            onNavigateToNowPlaying()
         }
     }
 }
 
-/**
- * CollectionScreen - Browse music library
- */
 @Composable
 fun CollectionScreen(
     modifier: Modifier = Modifier,
-    viewModel: CollectionViewModel = hiltViewModel()
+    viewModel: CollectionViewModel = hiltViewModel(),
+    onNavigateToNowPlaying: () -> Unit
 ) {
     val colors = sonicColors
     var selectedTab by remember { mutableStateOf(0) }
@@ -120,7 +122,6 @@ fun CollectionScreen(
             .fillMaxSize()
             .background(colors.background)
     ) {
-        // Tabs
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = colors.surface,
@@ -141,7 +142,6 @@ fun CollectionScreen(
             }
         }
         
-        // Content
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -151,31 +151,40 @@ fun CollectionScreen(
             }
         } else {
             when (selectedTab) {
-                0 -> SongsTab(tracks, viewModel)
-                1 -> ArtistsTab(artists, viewModel)
-                2 -> AlbumsTab(albums, viewModel)
+                0 -> SongsTab(tracks, viewModel, onNavigateToNowPlaying)
+                1 -> ArtistsTab(artists, viewModel, onNavigateToNowPlaying)
+                2 -> AlbumsTab(albums, viewModel, onNavigateToNowPlaying)
             }
         }
     }
 }
 
 @Composable
-private fun SongsTab(tracks: List<Track>, viewModel: CollectionViewModel) {
-    val colors = sonicColors
-    
+private fun SongsTab(
+    tracks: List<Track>,
+    viewModel: CollectionViewModel,
+    onNavigateToNowPlaying: () -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(tracks) { track ->
-            TrackItem(track = track, onClick = { viewModel.playTrack(track) })
+        items(tracks, key = { it.id }) { track ->
+            TrackItem(
+                track = track,
+                onClick = { viewModel.playTrack(track, onNavigateToNowPlaying) }
+            )
         }
     }
 }
 
 @Composable
-private fun ArtistsTab(artists: List<String>, viewModel: CollectionViewModel) {
+private fun ArtistsTab(
+    artists: List<String>,
+    viewModel: CollectionViewModel,
+    onNavigateToNowPlaying: () -> Unit
+) {
     val colors = sonicColors
     
     LazyColumn(
@@ -187,10 +196,8 @@ private fun ArtistsTab(artists: List<String>, viewModel: CollectionViewModel) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.playArtist(artist) },
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surface
-                )
+                    .clickable { viewModel.playArtist(artist, onNavigateToNowPlaying) },
+                colors = CardDefaults.cardColors(containerColor = colors.surface)
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -216,7 +223,11 @@ private fun ArtistsTab(artists: List<String>, viewModel: CollectionViewModel) {
 }
 
 @Composable
-private fun AlbumsTab(albums: List<String>, viewModel: CollectionViewModel) {
+private fun AlbumsTab(
+    albums: List<String>,
+    viewModel: CollectionViewModel,
+    onNavigateToNowPlaying: () -> Unit
+) {
     val colors = sonicColors
     
     LazyColumn(
@@ -228,10 +239,8 @@ private fun AlbumsTab(albums: List<String>, viewModel: CollectionViewModel) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.playAlbum(album) },
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surface
-                )
+                    .clickable { viewModel.playAlbum(album, onNavigateToNowPlaying) },
+                colors = CardDefaults.cardColors(containerColor = colors.surface)
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -264,22 +273,20 @@ private fun TrackItem(track: Track, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = colors.surface
-        )
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Album art thumbnail
+            // Album art - FIXED to show properly
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(colors.background)
             ) {
-                if (track.albumArtUri != null) {
+                if (!track.albumArtUri.isNullOrEmpty()) {
                     AsyncImage(
                         model = track.albumArtUri,
                         contentDescription = "Album art",
@@ -300,7 +307,6 @@ private fun TrackItem(track: Track, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Track info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
@@ -320,7 +326,6 @@ private fun TrackItem(track: Track, onClick: () -> Unit) {
                 )
             }
             
-            // Duration
             Text(
                 text = formatDuration(track.duration),
                 color = colors.textTertiary,
