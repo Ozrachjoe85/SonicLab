@@ -5,43 +5,43 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Central treble clef (music note) -->
-    <path
-        android:fillColor="#00E5FF"
-        android:pathData="M48,35 Q48,30 52,28 Q56,26 58,30 L58,65 Q58,70 54,72 Q50,74 48,70 Z"/>
-    
-    <path
-        android:fillColor="#FF00FF"
-        android:pathData="M52,32 Q54,30 56,32 Q58,34 56,36 Q54,38 52,36 Q50,34 52,32 Z"/>
-    
-    <!-- Waveform (left side) -->
+    <!-- Outer neon ring - cyan to pink gradient -->
     <path
         android:strokeColor="#00E5FF"
-        android:strokeWidth="2"
+        android:strokeWidth="3"
         android:fillColor="#00000000"
-        android:pathData="M28,48 L30,45 L32,50 L34,43 L36,52 L38,46 L40,48"/>
+        android:pathData="M54,30 A24,24 0 1,1 54,78 A24,24 0 1,1 54,30"/>
     
-    <!-- Waveform (right side) -->
+    <!-- Inner neon ring - purple -->
     <path
-        android:strokeColor="#FF00FF"
-        android:strokeWidth="2"
-        android:fillColor="#00000000"
-        android:pathData="M68,48 L70,45 L72,50 L74,43 L76,52 L78,46 L80,48"/>
-    
-    <!-- Circular ring -->
-    <path
-        android:pathData="M54,30 A18,18 0 0,1 54,66 A18,18 0 0,1 54,30"
         android:strokeColor="#B400FF"
         android:strokeWidth="2.5"
         android:fillColor="#00000000"
-        android:strokeAlpha="0.6"/>
+        android:pathData="M54,35 A19,19 0 1,1 54,73 A19,19 0 1,1 54,35"/>
     
-    <!-- Frequency bars (bottom) -->
-    <path android:fillColor="#00E5FF" android:pathData="M40,72 L42,72 L42,76 L40,76 Z" android:fillAlpha="0.8"/>
-    <path android:fillColor="#00E5FF" android:pathData="M44,70 L46,70 L46,76 L44,76 Z" android:fillAlpha="0.9"/>
-    <path android:fillColor="#FF00FF" android:pathData="M48,68 L50,68 L50,76 L48,76 Z"/>
-    <path android:fillColor="#FF00FF" android:pathData="M52,66 L54,66 L54,76 L52,76 Z"/>
-    <path android:fillColor="#FF00FF" android:pathData="M56,68 L58,68 L58,76 L56,76 Z"/>
-    <path android:fillColor="#00E5FF" android:pathData="M60,70 L62,70 L62,76 L60,76 Z" android:fillAlpha="0.9"/>
-    <path android:fillColor="#00E5FF" android:pathData="M64,72 L66,72 L66,76 L64,76 Z" android:fillAlpha="0.8"/>
+    <!-- Central play button triangle -->
+    <path
+        android:fillColor="#FF00FF"
+        android:pathData="M48,44 L62,54 L48,64 Z"/>
+    
+    <!-- Waveform bars on left -->
+    <path android:fillColor="#00E5FF" android:pathData="M25,48 L27,48 L27,52 L25,52 Z"/>
+    <path android:fillColor="#00E5FF" android:pathData="M29,46 L31,46 L31,54 L29,54 Z"/>
+    <path android:fillColor="#00E5FF" android:pathData="M33,44 L35,44 L35,56 L33,56 Z"/>
+    <path android:fillColor="#00E5FF" android:pathData="M37,46 L39,46 L39,54 L37,54 Z"/>
+    
+    <!-- Waveform bars on right -->
+    <path android:fillColor="#FF00FF" android:pathData="M69,48 L71,48 L71,52 L69,52 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M73,46 L75,46 L75,54 L73,54 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M77,44 L79,44 L79,56 L77,56 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M81,46 L83,46 L83,54 L81,54 Z"/>
+    
+    <!-- Bottom equalizer bars -->
+    <path android:fillColor="#00E5FF" android:pathData="M42,72 L44,72 L44,76 L42,76 Z" android:fillAlpha="0.8"/>
+    <path android:fillColor="#B400FF" android:pathData="M46,70 L48,70 L48,76 L46,76 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M50,68 L52,68 L52,76 L50,76 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M54,66 L56,66 L56,76 L54,76 Z"/>
+    <path android:fillColor="#FF00FF" android:pathData="M58,68 L60,68 L60,76 L58,76 Z"/>
+    <path android:fillColor="#B400FF" android:pathData="M62,70 L64,70 L64,76 L62,76 Z"/>
+    <path android:fillColor="#00E5FF" android:pathData="M66,72 L68,72 L68,76 L66,76 Z" android:fillAlpha="0.8"/>
 </vector>
