@@ -7,9 +7,13 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.soniclab.app.audio.IntelligentEQManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,6 +37,7 @@ class PlayerManager @Inject constructor(
     private val eqManager: IntelligentEQManager
 ) {
     private var player: ExoPlayer? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
@@ -71,8 +76,7 @@ class PlayerManager @Inject constructor(
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_ENDED) {
                             handleTrackEnded()
-                        } else if (state == Player.STATE_READY && playing) {
-                            // Initialize EQ when playback starts
+                        } else if (state == Player.STATE_READY && this@apply.isPlaying) {
                             initializeEQForCurrentTrack()
                         }
                     }
@@ -83,12 +87,9 @@ class PlayerManager @Inject constructor(
     
     private fun initializeEQForCurrentTrack() {
         player?.let { p ->
-            // Initialize EQ with audio session
             eqManager.initialize(p.audioSessionId)
-            
-            // Start analysis for current track
             _currentTrack.value?.let { track ->
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                scope.launch {
                     eqManager.startTrackAnalysis(track.id)
                 }
             }
@@ -99,20 +100,14 @@ class PlayerManager @Inject constructor(
         originalQueue = tracks
         _queue.value = tracks
         _currentIndex.value = startIndex
-        
-        if (_shuffleEnabled.value) {
-            applyShuffleToQueue()
-        }
-        
+        if (_shuffleEnabled.value) applyShuffleToQueue()
         prepareQueue()
         player?.seekToDefaultPosition(startIndex)
         _currentTrack.value = tracks.getOrNull(startIndex)
     }
     
     private fun prepareQueue() {
-        val mediaItems = _queue.value.map { track ->
-            MediaItem.fromUri(Uri.parse(track.uri))
-        }
+        val mediaItems = _queue.value.map { track -> MediaItem.fromUri(Uri.parse(track.uri)) }
         player?.setMediaItems(mediaItems)
         player?.prepare()
     }
@@ -126,11 +121,7 @@ class PlayerManager @Inject constructor(
             RepeatMode.ALL -> playNext()
             RepeatMode.OFF -> {
                 val nextIndex = _currentIndex.value + 1
-                if (nextIndex < _queue.value.size) {
-                    playNext()
-                } else {
-                    pause()
-                }
+                if (nextIndex < _queue.value.size) playNext() else pause()
             }
         }
     }
@@ -160,11 +151,7 @@ class PlayerManager @Inject constructor(
         if (currentPos > 3000) {
             player?.seekTo(0)
         } else {
-            val prevIndex = if (_currentIndex.value > 0) {
-                _currentIndex.value - 1
-            } else {
-                _queue.value.size - 1
-            }
+            val prevIndex = if (_currentIndex.value > 0) _currentIndex.value - 1 else _queue.value.size - 1
             _currentIndex.value = prevIndex
             _currentTrack.value = _queue.value.getOrNull(prevIndex)
             player?.seekToDefaultPosition(prevIndex)
@@ -199,13 +186,11 @@ class PlayerManager @Inject constructor(
     private fun applyShuffleToQueue() {
         val currentTrack = _currentTrack.value
         val mutableQueue = originalQueue.toMutableList()
-        
         currentTrack?.let {
             mutableQueue.remove(it)
             mutableQueue.shuffle()
             mutableQueue.add(0, it)
         } ?: mutableQueue.shuffle()
-        
         _queue.value = mutableQueue
         _currentIndex.value = 0
     }
