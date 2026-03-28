@@ -11,22 +11,70 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import com.soniclab.app.audio.EQMode
+import com.soniclab.app.audio.IntelligentEQManager
 import com.soniclab.app.ui.theme.sonicColors
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class EqualizerViewModel @Inject constructor(
+    private val eqManager: IntelligentEQManager
+) : ViewModel() {
+    
+    val mode = eqManager.mode
+    val isEnabled = eqManager.isEnabled
+    val currentProfile = eqManager.currentProfile
+    
+    private val _manualLevels = mutableStateListOf(0f, 0f, 0f, 0f, 0f)
+    val manualLevels: List<Float> = _manualLevels
+    
+    fun setMode(newMode: EQMode) {
+        eqManager.setMode(newMode)
+    }
+    
+    fun toggleEnabled() {
+        eqManager.setEnabled(!isEnabled.value)
+    }
+    
+    fun setManualBandLevel(bandIndex: Int, level: Float) {
+        _manualLevels[bandIndex] = level
+        eqManager.setManualBandLevel(bandIndex, level)
+    }
+    
+    fun applyPreset(preset: String) {
+        val levels = when (preset) {
+            "Flat" -> listOf(0f, 0f, 0f, 0f, 0f)
+            "Bass Boost" -> listOf(0.8f, 0.5f, 0f, 0f, 0f)
+            "Treble Boost" -> listOf(0f, 0f, 0f, 0.6f, 0.8f)
+            "Vocal" -> listOf(0f, 0f, 0.5f, 0.5f, 0f)
+            "Rock" -> listOf(0.6f, 0.2f, 0f, 0.3f, 0.5f)
+            else -> listOf(0f, 0f, 0f, 0f, 0f)
+        }
+        
+        levels.forEachIndexed { index, level ->
+            setManualBandLevel(index, level)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EqualizerScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: EqualizerViewModel = hiltViewModel()
 ) {
     val colors = sonicColors
     val scrollState = rememberScrollState()
     
-    var isEnabled by remember { mutableStateOf(false) }
-    var selectedPreset by remember { mutableStateOf("Flat") }
+    val mode by viewModel.mode.collectAsState()
+    val isEnabled by viewModel.isEnabled.collectAsState()
+    val currentProfile by viewModel.currentProfile.collectAsState()
     
-    val presets = listOf("Flat", "Bass Boost", "Treble Boost", "Vocal Boost", "Rock", "Pop", "Classical", "Jazz")
-    val bands = listOf("60Hz", "230Hz", "910Hz", "3.6kHz", "14kHz")
-    val bandLevels = remember { mutableStateListOf(0f, 0f, 0f, 0f, 0f) }
+    val bandNames = listOf("60Hz", "230Hz", "910Hz", "3.6kHz", "14kHz")
+    val presets = listOf("Flat", "Bass", "Treble", "Vocal", "Rock")
     
     Column(
         modifier = modifier
@@ -41,166 +89,99 @@ fun EqualizerScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "EQUALIZER",
-                color = colors.textPrimary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-            
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { isEnabled = it },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = colors.primary,
-                    checkedTrackColor = colors.primary.copy(alpha = 0.5f)
-                )
-            )
+            Text("EQUALIZER", color = colors.textPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+            Switch(checked = isEnabled, onCheckedChange = { viewModel.toggleEnabled() })
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
         
-        Text(
-            text = "PRESETS",
-            color = colors.primary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp
-        )
-        
-        Spacer(modifier = Modifier.height(12.dp))
+        Text("MODE", color = colors.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
         
         Card(colors = CardDefaults.cardColors(containerColor = colors.surface)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                presets.chunked(4).forEach { row ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        row.forEach { preset ->
-                            FilterChip(
-                                selected = selectedPreset == preset,
-                                onClick = { 
-                                    selectedPreset = preset
-                                    when (preset) {
-                                        "Bass Boost" -> {
-                                            bandLevels[0] = 0.8f
-                                            bandLevels[1] = 0.5f
-                                            bandLevels[2] = 0f
-                                            bandLevels[3] = 0f
-                                            bandLevels[4] = 0f
-                                        }
-                                        "Treble Boost" -> {
-                                            bandLevels[0] = 0f
-                                            bandLevels[1] = 0f
-                                            bandLevels[2] = 0f
-                                            bandLevels[3] = 0.6f
-                                            bandLevels[4] = 0.8f
-                                        }
-                                        else -> {
-                                            for (i in bandLevels.indices) bandLevels[i] = 0f
-                                        }
-                                    }
-                                },
-                                label = { Text(preset, fontSize = 12.sp) },
-                                modifier = Modifier.weight(1f),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = colors.primary.copy(alpha = 0.2f),
-                                    selectedLabelColor = colors.primary
-                                )
+            Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FilterChip(
+                    selected = mode == EQMode.AUTO,
+                    onClick = { viewModel.setMode(EQMode.AUTO) },
+                    label = { Text("AUTO", fontSize = 13.sp) },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = mode == EQMode.MANUAL,
+                    onClick = { viewModel.setMode(EQMode.MANUAL) },
+                    label = { Text("MANUAL", fontSize = 13.sp) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        if (mode == EQMode.AUTO) {
+            Text("STATUS", color = colors.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+            Card(colors = CardDefaults.cardColors(containerColor = colors.surface)) {
+                Column(Modifier.padding(16.dp)) {
+                    currentProfile?.let { p ->
+                        Text("Status: ${if (p.isLearned) "OPTIMIZED ✓" else "LEARNING..."}", fontSize = 14.sp)
+                        Text("Plays: ${p.playCount}", fontSize = 14.sp)
+                        Text("Confidence: ${(p.confidence * 100).toInt()}%", fontSize = 14.sp)
+                        LinearProgressIndicator(p.confidence, Modifier.fillMaxWidth())
+                    } ?: Text("No song playing", fontSize = 14.sp)
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+        
+        if (mode == EQMode.MANUAL) {
+            Text("PRESETS", color = colors.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+            Card(colors = CardDefaults.cardColors(containerColor = colors.surface)) {
+                Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    presets.forEach { preset ->
+                        FilterChip(
+                            selected = false,
+                            onClick = { viewModel.applyPreset(preset) },
+                            label = { Text(preset, fontSize = 11.sp) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+        
+        Text(if (mode == EQMode.AUTO) "LEARNED EQ" else "MANUAL EQ", color = colors.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+        
+        Card(colors = CardDefaults.cardColors(containerColor = colors.surface)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                if (mode == EQMode.AUTO) {
+                    currentProfile?.let { p ->
+                        val levels = listOf(p.eq60Hz, p.eq230Hz, p.eq910Hz, p.eq3_6kHz, p.eq14kHz)
+                        bandNames.forEachIndexed { i, band ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(band, fontSize = 14.sp)
+                                Text("${(levels[i] * 10).toInt()}dB", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    } ?: Text("Play a song to see learned EQ", fontSize = 14.sp)
+                } else {
+                    bandNames.forEachIndexed { i, band ->
+                        Column {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(band, fontSize = 14.sp)
+                                Text("${(viewModel.manualLevels[i] * 10).toInt()}dB", fontSize = 14.sp)
+                            }
+                            Slider(
+                                value = (viewModel.manualLevels[i] + 1f) / 2f,
+                                onValueChange = { viewModel.setManualBandLevel(i, it * 2f - 1f) },
+                                enabled = isEnabled
                             )
                         }
                     }
-                    if (row != presets.chunked(4).last()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text(
-            text = "FREQUENCY BANDS",
-            color = colors.primary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.5.sp
-        )
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        Card(colors = CardDefaults.cardColors(containerColor = colors.surface)) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    "EQ UI ready - Full audio processing in Phase 3",
-                    color = colors.textSecondary,
-                    fontSize = 13.sp
-                )
-                
-                bands.forEachIndexed { index, band ->
-                    EQBandSlider(
-                        frequency = band,
-                        level = bandLevels.getOrElse(index) { 0f },
-                        enabled = isEnabled,
-                        onLevelChange = { bandLevels[index] = it }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EQBandSlider(
-    frequency: String,
-    level: Float,
-    enabled: Boolean,
-    onLevelChange: (Float) -> Unit
-) {
-    val colors = sonicColors
-    
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = frequency,
-                color = if (enabled) colors.textPrimary else colors.textTertiary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Text(
-                text = when {
-                    level > 0 -> "+${(level * 10).toInt()}"
-                    level < 0 -> "${(level * 10).toInt()}"
-                    else -> "0"
-                },
-                color = if (enabled) colors.primary else colors.textTertiary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Slider(
-            value = (level + 1f) / 2f,
-            onValueChange = { onLevelChange(it * 2f - 1f) },
-            enabled = enabled,
-            colors = SliderDefaults.colors(
-                thumbColor = colors.primary,
-                activeTrackColor = colors.primary,
-                inactiveTrackColor = colors.border,
-                disabledThumbColor = colors.textTertiary,
-                disabledActiveTrackColor = colors.border
-            )
-        )
     }
 }
