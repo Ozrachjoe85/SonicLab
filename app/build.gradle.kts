@@ -46,7 +46,7 @@ android {
     }
     
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"  // Updated for Kotlin 1.9.20
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     
     packaging {
@@ -77,6 +77,11 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    
+    // Room Database - ADDED FOR INTELLIGENT SONG LEARNING
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
     
     // Media3
     implementation("androidx.media3:media3-exoplayer:1.2.0")
