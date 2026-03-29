@@ -18,18 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     
-    private lateinit var permissionHandler: PermissionHandler
-    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        permissionHandler = PermissionHandler(this) { granted ->
-            // Permission handled by ViewModel
-        }
-        
-        if (!permissionHandler.hasPermissions(this)) {
-            permissionHandler.requestPermissions()
-        }
         
         setContent {
             SonicLabTheme {
