@@ -1,7 +1,5 @@
 package com.soniclab.app.ui.screens
 
-package com.soniclab.app.ui.screens
-
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.soniclab.app.ui.theme.sonicColors
-import com.soniclab.app.util.PermissionHandler  // ← ADD THIS LINE
+import com.soniclab.app.util.PermissionHandler
 
 @Composable
 fun PermissionScreen(
