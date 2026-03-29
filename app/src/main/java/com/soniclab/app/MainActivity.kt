@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.soniclab.app.ui.screens.*
 import com.soniclab.app.ui.theme.SonicLabTheme
 import com.soniclab.app.ui.theme.sonicColors
-import com.soniclab.app.util.PermissionHandler
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
